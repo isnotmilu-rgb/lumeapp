@@ -1,6 +1,22 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Share2, Heart, MessageCircle, MapPin, List, User, CheckCircle, Droplet, DollarSign, Package, Tag, ShieldCheck, Wind, Leaf, Scissors, Star, type LucideIcon } from 'lucide-react';
+import {
+  ArrowLeft,
+  CheckCircle,
+  DollarSign,
+  Droplet,
+  Heart,
+  Leaf,
+  MessageCircle,
+  MapPin,
+  Package,
+  Scissors,
+  Share2,
+  ShieldCheck,
+  Star,
+  Tag,
+  Wind,
+} from 'lucide-react';
 import { useApp } from '../App';
 
 const vendors = [
@@ -13,7 +29,7 @@ const vendors = [
   { id: 7, name: 'Forestal Cautín', initials: 'FC', humidity: 23, certified: true, species: 'Roble', available: 18, price: 44000, address: 'Ruta 5 Norte km 8, Temuco', lastMeasured: '5 días', rating: 4.5, reviews: 18, daysAgo: 5 },
 ];
 
-const featureItems: { icon: LucideIcon; label: string }[] = [
+const featureItems = [
   { icon: ShieldCheck, label: 'Cert. NCh 2965' },
   { icon: Wind, label: 'Secado controlado' },
   { icon: Leaf, label: 'Leña seleccionada' },
@@ -27,12 +43,14 @@ export function SellerProfile() {
   const vendor = vendors.find(v => v.id === Number(id));
   const [selectedMeters, setSelectedMeters] = useState(1);
 
-  if (!vendor) return (
-    <div style={{ height:'100dvh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
-      <p>Vendedor no encontrado</p>
-      <button onClick={() => navigate(-1)}>Volver</button>
-    </div>
-  );
+  if (!vendor) {
+    return (
+      <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+        <p>Vendedor no encontrado</p>
+        <button onClick={() => navigate(-1)}>Volver</button>
+      </div>
+    );
+  }
 
   const totalPrice = vendor.price * selectedMeters;
   const measurements = [
@@ -41,229 +59,288 @@ export function SellerProfile() {
     { date: '04 May 2026', time: '11:00', humidity: vendor.humidity !== null ? vendor.humidity + 3 : 26, species: vendor.species, status: (vendor.humidity ?? 26) <= 20 ? 'Óptimo' : 'Aceptable' },
   ];
 
-  const stars = [1, 2, 3, 4, 5];
-
   return (
-    <div className="min-h-screen bg-[#F5F7F4]">
-      <div className="mx-auto grid w-full max-w-[1100px] gap-8 px-4 py-6 md:grid-cols-[400px_1fr] md:px-6 md:py-8">
-        <div className="relative">
-          <div className="relative h-[320px] overflow-hidden rounded-b-[32px] bg-[linear-gradient(160deg,#071a08_0%,#0d2e10_30%,#1B5E20_70%,#2E7D32_100%)] p-5 md:min-h-[400px] md:rounded-[16px]">
-            <div className="flex items-center justify-between">
+    <div style={{ minHeight: '100dvh', background: '#F5F7F4', display: 'flex', justifyContent: 'center' }}>
+      <div style={{ width: '100%', maxWidth: '500px', background: 'white', position: 'relative' }}>
+        <div
+          style={{
+            height: 280,
+            background: 'linear-gradient(160deg, #071a08 0%, #1B5E20 70%, #2E7D32 100%)',
+            borderRadius: '0 0 28px 28px',
+            padding: 20,
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <button
+              onClick={() => navigate(-1)}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 999,
+                background: 'rgba(255,255,255,0.9)',
+                boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <ArrowLeft size={18} color="#1B5E20" />
+            </button>
+            <div style={{ display: 'flex', gap: 12 }}>
               <button
-                onClick={() => navigate(-1)}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md transition hover:bg-white active:scale-95"
+                onClick={() => setShowComingSoon(true)}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 999,
+                  background: 'rgba(255,255,255,0.9)',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
               >
-                <ArrowLeft size={20} className="text-[#1B5E20]" />
+                <Share2 size={18} color="#1B5E20" />
               </button>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowComingSoon(true)}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md transition hover:bg-white active:scale-95"
-                >
-                  <Share2 size={18} className="text-[#1B5E20]" />
-                </button>
-                <button
-                  onClick={() => setShowComingSoon(true)}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-white/90 shadow-md transition hover:bg-white active:scale-95"
-                >
-                  <Heart size={18} className="text-[#1B5E20]" />
-                </button>
-              </div>
+              <button
+                onClick={() => setShowComingSoon(true)}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 999,
+                  background: 'rgba(255,255,255,0.9)',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <Heart size={18} color="#1B5E20" />
+              </button>
             </div>
+          </div>
 
-            <div className="flex-1" />
+          <div style={{ flex: 1 }} />
 
-            <div className="space-y-3">
-              {vendor.certified && (
-                <span className="inline-flex items-center gap-2 rounded-full bg-[#2E7D32] px-3.5 py-1.5 text-white text-[12px] font-semibold">
-                  <CheckCircle size={14} />
-                  Proveedor verificado
-                </span>
-              )}
-              <div className="space-y-2">
-                <h1 className="text-[32px] font-extrabold leading-[1.1] text-white md:text-[36px]">{vendor.name}</h1>
-                <div className="flex items-center gap-2 text-white/70 text-[14px]">
-                  <MapPin size={14} />
-                  <span>{vendor.address}</span>
-                </div>
-                <div className="mt-2 flex items-center gap-2 text-[#A5D6A7] text-[13px]">
-                  <span className="h-2 w-2 rounded-full bg-[#A5D6A7]" />
-                  <span>En línea · Responde rápido</span>
-                </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {vendor.certified && (
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  background: '#2E7D32',
+                  color: '#fff',
+                  borderRadius: 20,
+                  padding: '6px 14px',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  width: 'fit-content',
+                }}
+              >
+                <CheckCircle size={14} color="#fff" />
+                Proveedor verificado
               </div>
+            )}
+            <h1 style={{ margin: 0, color: 'white', fontSize: 30, fontWeight: 800, lineHeight: 1.05 }}> {vendor.name} </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.8)', fontSize: 14 }}>
+              <MapPin size={14} color="rgba(255,255,255,0.8)" />
+              <span>{vendor.address}</span>
             </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#A5D6A7', fontSize: 13 }}>
+              <span style={{ width: 8, height: 8, borderRadius: 999, background: '#A5D6A7', display: 'inline-block' }} />
+              <span>En línea · Responde rápido</span>
+            </div>
+          </div>
 
-            <div className="absolute bottom-5 right-5 rounded-[16px] bg-white px-4 py-2 shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
-              <div className="flex items-center gap-2">
-                <Star size={16} className="text-[#FBBF24]" />
-                <span className="font-bold text-[#1B5E20]">{vendor.rating}</span>
-                <span className="text-sm text-gray-500">({vendor.reviews} reseñas)</span>
-              </div>
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 20,
+              right: 20,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              background: 'white',
+              borderRadius: 16,
+              padding: '8px 14px',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            }}
+          >
+            <Star size={16} color="#FBBF24" />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <span style={{ fontWeight: 700, color: '#1B5E20' }}>{vendor.rating}</span>
+              <span style={{ fontSize: 12, color: '#6B7280' }}>({vendor.reviews} reseñas)</span>
             </div>
           </div>
         </div>
 
-        <div className="space-y-6 pb-40 md:pb-0">
-          <div className="grid grid-cols-1 gap-3 mt-[-20px] mx-4 md:mt-0 md:mx-0 md:grid-cols-3">
-            <div className="rounded-[20px] bg-[#E8F5E9] border border-[#C8E6C9] p-4">
-              <div className="flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6B7280]">HUMEDAD</p>
-                <Droplet size={22} className="text-[#2E7D32]" />
-              </div>
-              <p className="mt-4 text-[28px] font-bold text-[#1B5E20]">{vendor.humidity ?? '—'}%</p>
-              <span className="mt-3 inline-flex rounded-[10px] bg-[#2E7D32] px-3 py-1 text-[11px] font-semibold text-white">Óptimo</span>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, margin: '-20px 16px 0' }}>
+          <div style={{ borderRadius: 16, padding: 14, background: '#E8F5E9', boxShadow: '0 10px 30px rgba(16, 185, 129, 0.08)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 11, lineHeight: 1.4, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#6B7280' }}>Humedad</span>
+              <Droplet size={20} color="#2E7D32" />
             </div>
-            <div className="rounded-[20px] bg-[#E3F2FD] border border-[#BBDEFB] p-4">
-              <div className="flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6B7280]">PRECIO/M³</p>
-                <Tag size={22} className="text-[#1565C0]" />
-              </div>
-              <p className="mt-4 text-[24px] font-bold text-[#1565C0]">${(vendor.price / 1000).toFixed(0)}k</p>
-              <p className="mt-2 text-[12px] text-[#6B7280]">por metro</p>
-            </div>
-            <div className="rounded-[20px] bg-[#F3E5F5] border border-[#E1BEE7] p-4">
-              <div className="flex items-center justify-between">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#6B7280]">STOCK</p>
-                <Package size={22} className="text-[#7B1FA2]" />
-              </div>
-              <p className="mt-4 text-[24px] font-bold text-[#7B1FA2]">{vendor.available}m³</p>
-              <p className="mt-2 text-[12px] text-[#6B7280]">metros disp.</p>
-            </div>
+            <p style={{ margin: 0, fontSize: 28, fontWeight: 800, color: '#1B5E20' }}>{vendor.humidity ?? '—'}%</p>
+            <span style={{ display: 'inline-block', marginTop: 10, borderRadius: 10, background: '#2E7D32', color: 'white', padding: '4px 10px', fontSize: 11, fontWeight: 700 }}>Óptimo</span>
           </div>
-
-          <div className="overflow-x-auto no-scrollbar px-4 md:px-0">
-            <div className="flex gap-2">
-              {featureItems.map((feature, index) => {
-                const Icon = feature.icon;
-                return (
-                  <div key={index} className="flex flex-shrink-0 items-center gap-2 rounded-[20px] border border-[#E5E7EB] bg-white px-3.5 py-2">
-                    <Icon size={16} className="text-[#2E7D32]" />
-                    <span className="text-[13px] text-[#374151]">{feature.label}</span>
-                  </div>
-                );
-              })}
+          <div style={{ borderRadius: 16, padding: 14, background: '#E3F2FD', boxShadow: '0 10px 30px rgba(59, 130, 246, 0.08)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 11, lineHeight: 1.4, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#6B7280' }}>Precio/m³</span>
+              <Tag size={20} color="#1565C0" />
             </div>
+            <p style={{ margin: 0, fontSize: 24, fontWeight: 800, color: '#1565C0' }}>${(vendor.price / 1000).toFixed(0)}k</p>
           </div>
+          <div style={{ borderRadius: 16, padding: 14, background: '#F3E5F5', boxShadow: '0 10px 30px rgba(123, 31, 162, 0.08)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 11, lineHeight: 1.4, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#6B7280' }}>Stock</span>
+              <Package size={20} color="#7B1FA2" />
+            </div>
+            <p style={{ margin: 0, fontSize: 24, fontWeight: 800, color: '#7B1FA2' }}>{vendor.available}m³</p>
+          </div>
+        </div>
 
-          <div className="rounded-[20px] bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
-            <p className="text-[16px] font-semibold text-[#111827]">¿Cuántos metros necesitas?</p>
-            <div className="mt-6 flex items-center justify-center gap-6">
+        <div style={{ overflowX: 'auto', padding: '16px 16px 0', display: 'flex', gap: 8 }} className="no-scrollbar">
+          {featureItems.map((feature, index) => {
+            const Icon = feature.icon;
+            return (
+              <div key={index} style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 20, border: '1px solid #E5E7EB', background: '#ffffff' }}>
+                <Icon size={16} color="#2E7D32" />
+                <span style={{ fontSize: 13, color: '#374151' }}>{feature.label}</span>
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{ padding: '20px 20px 0' }}>
+          <div style={{ borderRadius: 16, background: 'white', boxShadow: '0 12px 40px rgba(15, 23, 42, 0.08)', padding: 20 }}>
+            <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#111827' }}>¿Cuántos metros necesitas?</p>
+            <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 24 }}>
               <button
                 onClick={() => setSelectedMeters(m => Math.max(1, m - 1))}
                 disabled={selectedMeters <= 1}
-                className={`flex h-11 w-11 items-center justify-center rounded-full border-2 text-[22px] font-bold transition ${selectedMeters <= 1 ? 'border-[#D1D5DB] text-[#9CA3AF] bg-white' : 'border-[#2E7D32] text-[#2E7D32] bg-white hover:bg-[#F3F9F4]'}`}
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 999,
+                  border: `2px solid ${selectedMeters <= 1 ? '#D1D5DB' : '#2E7D32'}`,
+                  color: selectedMeters <= 1 ? '#9CA3AF' : '#2E7D32',
+                  background: 'white',
+                  fontSize: 22,
+                  fontWeight: 700,
+                  cursor: selectedMeters <= 1 ? 'not-allowed' : 'pointer',
+                }}
               >
                 −
               </button>
-              <div className="min-w-[60px] text-center text-[40px] font-black text-[#111827]">{selectedMeters}</div>
+              <div style={{ minWidth: 60, textAlign: 'center', fontSize: 40, fontWeight: 800, color: '#111827' }}>{selectedMeters}</div>
               <button
                 onClick={() => setSelectedMeters(m => Math.min(vendor.available, m + 1))}
-                className="flex h-11 w-11 items-center justify-center rounded-full bg-[#2E7D32] text-white text-[22px] shadow-[0_4px_12px_rgba(46,125,50,0.25)] transition hover:bg-[#25682b]"
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 999,
+                  border: 'none',
+                  background: '#2E7D32',
+                  color: 'white',
+                  fontSize: 22,
+                  fontWeight: 700,
+                  boxShadow: '0 10px 30px rgba(46, 125, 50, 0.25)',
+                  cursor: 'pointer',
+                }}
               >
                 +
               </button>
             </div>
-            <div className="mt-3 rounded-[14px] bg-[#F9FBE7] p-4">
-              <p className="text-[13px] text-[#6B7280]">Total estimado</p>
-              <p className="mt-2 text-[30px] font-extrabold text-[#1B5E20]">${totalPrice.toLocaleString('es-CL')}</p>
-              <p className="mt-1 text-[12px] text-[#6B7280]">${vendor.price.toLocaleString('es-CL')} por metro</p>
-            </div>
-            <button
-              onClick={() => navigate(`/contact/${id}`)}
-              className="mt-4 w-full rounded-[16px] border border-[#E5E7EB] bg-white py-3 text-sm font-semibold text-[#1B5E20] transition hover:bg-[#F3F7F3]"
-            >
-              Ver contacto directo
-            </button>
-          </div>
-
-          <div className="px-4 md:px-0">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-[#111827]">Últimas mediciones</h2>
-              <button onClick={() => navigate(`/history/${id}`)} className="text-[#1B5E20] text-sm font-semibold">Ver histórico</button>
-            </div>
-            <div className="mt-3 flex gap-3 overflow-x-auto no-scrollbar pb-3">
-              {measurements.map((m, i) => {
-                const isOptimal = m.humidity <= 20;
-                return (
-                  <div key={i} className="min-w-[140px] flex-shrink-0 rounded-[16px] bg-white p-4 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
-                    <span className={`mb-3 inline-block h-2 w-2 rounded-full ${isOptimal ? 'bg-emerald-500' : 'bg-amber-400'}`} />
-                    <p className={`text-[22px] font-bold ${isOptimal ? 'text-emerald-700' : 'text-amber-700'}`}>{m.humidity}%</p>
-                    <p className="mt-2 text-[12px] text-[#6B7280]">{m.date} · {m.time}</p>
-                    <span className={`mt-3 inline-flex rounded-[8px] px-2 py-1 text-[11px] font-semibold ${isOptimal ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
-                      {m.status}
-                    </span>
-                  </div>
-                );
-              })}
+            <div style={{ marginTop: 12, borderRadius: 14, background: '#F9FBE7', padding: 14 }}>
+              <p style={{ margin: 0, fontSize: 13, color: '#6B7280' }}>Total estimado</p>
+              <p style={{ margin: '8px 0 0', fontSize: 30, fontWeight: 800, color: '#1B5E20' }}>${totalPrice.toLocaleString('es-CL')}</p>
             </div>
           </div>
+        </div>
 
-          <div className="px-4 md:px-0">
-            <div className="rounded-[20px] bg-white p-5 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
-              <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-                <div>
-                  <p className="text-[40px] font-extrabold text-[#111827]">{vendor.rating}</p>
-                  <div className="mt-2 flex items-center gap-1">
-                    {stars.map(i => (
-                      <Star key={i} size={16} className={i <= Math.round(vendor.rating) ? 'text-[#FBBF24]' : 'text-[#D1D5DB]'} />
-                    ))}
-                  </div>
-                  <p className="mt-2 text-sm text-[#6B7280]">({vendor.reviews} reseñas)</p>
+        <div style={{ padding: '20px 0 0' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#111827' }}>Últimas mediciones</h2>
+            <button onClick={() => navigate(`/history/${id}`)} style={{ border: 'none', background: 'transparent', color: '#1B5E20', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>Ver histórico</button>
+          </div>
+          <div style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '0 16px 12px', }} className="no-scrollbar">
+            {measurements.map((measurement, index) => {
+              const isOptimal = measurement.humidity <= 20;
+              return (
+                <div key={index} style={{ minWidth: 130, borderRadius: 14, background: 'white', padding: 14, boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)', flexShrink: 0 }}>
+                  <div style={{ width: 8, height: 8, borderRadius: 999, background: isOptimal ? '#10B981' : '#F59E0B', marginBottom: 10 }} />
+                  <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: isOptimal ? '#047857' : '#B45309' }}>{measurement.humidity}%</p>
+                  <p style={{ margin: '6px 0 0', fontSize: 12, color: '#6B7280' }}>{measurement.date}</p>
+                  <p style={{ margin: '2px 0 10px', fontSize: 12, color: '#6B7280' }}>{measurement.time}</p>
+                  <span style={{ display: 'inline-block', borderRadius: 8, padding: '4px 8px', fontSize: 11, fontWeight: 700, background: isOptimal ? '#ECFDF5' : '#FFFBEB', color: isOptimal ? '#047857' : '#B45309' }}>{measurement.status}</span>
                 </div>
-                <div className="space-y-3 md:max-w-[320px]">
-                  <div className="rounded-[16px] bg-[#F8FAFB] p-4">
-                    <p className="text-[13px] text-[#4B5563]">Servicio rápido y detallado. Leña lista para entrega.</p>
-                    <div className="mt-3 flex items-center gap-1">
-                      {stars.map(i => (
-                        <Star key={i} size={12} className="text-[#FBBF24]" />
-                      ))}
-                    </div>
-                  </div>
-                  <div className="rounded-[16px] bg-[#F8FAFB] p-4">
-                    <p className="text-[13px] text-[#4B5563]">Respuesta clara, despacho seguro y seguimiento por WhatsApp.</p>
-                    <div className="mt-3 flex items-center gap-1">
-                      {stars.map(i => (
-                        <Star key={i} size={12} className="text-[#FBBF24]" />
-                      ))}
-                    </div>
-                  </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{ padding: '20px 20px 0' }}>
+          <div style={{ borderRadius: 16, background: 'white', padding: 20, boxShadow: '0 12px 40px rgba(15, 23, 42, 0.08)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div>
+                <p style={{ margin: 0, fontSize: 40, fontWeight: 800, color: '#111827' }}>{vendor.rating}</p>
+                <div style={{ marginTop: 8, display: 'flex', gap: 4 }}>
+                  {[1, 2, 3, 4, 5].map((starIndex) => (
+                    <Star key={starIndex} size={16} color={starIndex <= Math.round(vendor.rating) ? '#FBBF24' : '#D1D5DB'} />
+                  ))}
+                </div>
+                <p style={{ margin: '10px 0 0', fontSize: 14, color: '#6B7280' }}>({vendor.reviews} reseñas)</p>
+              </div>
+              <div style={{ display: 'grid', gap: 12 }}>
+                <div style={{ borderRadius: 16, background: '#F8FAFB', padding: 16 }}>
+                  <p style={{ margin: 0, fontSize: 13, color: '#4B5563' }}>Servicio rápido y detallado. Leña lista para entrega.</p>
+                </div>
+                <div style={{ borderRadius: 16, background: '#F8FAFB', padding: 16 }}>
+                  <p style={{ margin: 0, fontSize: 13, color: '#4B5563' }}>Respuesta clara, despacho seguro y seguimiento por WhatsApp.</p>
                 </div>
               </div>
-              <button className="mt-5 text-sm font-semibold text-[#1B5E20]">Ver todas las reseñas</button>
             </div>
           </div>
-
-          <div className="h-20" />
         </div>
+
+        <div style={{ height: 100 }} />
       </div>
 
-      <div className="fixed bottom-0 left-1/2 z-50 w-full max-w-[430px] px-4" style={{ transform: 'translateX(-50%)', paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
-        <div className="rounded-[24px] border border-[#E5E7EB] bg-white/95 backdrop-blur-sm p-3 shadow-sm">
-          <div className="mb-3 flex justify-around rounded-[20px] bg-white p-2 shadow-sm">
-            <button onClick={() => navigate('/map')} className="flex flex-col items-center gap-1 text-gray-500"><MapPin size={20} /><span className="text-[11px]">Mapa</span></button>
-            <button onClick={() => navigate('/list')} className="flex flex-col items-center gap-1 text-gray-500"><List size={20} /><span className="text-[11px]">Lista</span></button>
-            <button onClick={() => navigate('/profile/buyer')} className="flex flex-col items-center gap-1 text-gray-500"><User size={20} /><span className="text-[11px]">Perfil</span></button>
-          </div>
-          <button
-            onClick={() => {
-              setCurrentStep(4);
-              const message = `Hola, vi tu leña en LumeApp. Me interesa ${vendor.species} a $${vendor.price.toLocaleString('es-CL')}/m³. ¿Podemos coordinar entrega de ${selectedMeters}m³?`;
-              const whatsappUrl = `https://wa.me/56912345678?text=${encodeURIComponent(message)}`;
-              window.open(whatsappUrl, '_blank');
-            }}
-            className="w-full rounded-[16px] bg-[linear-gradient(135deg,#1B5E20_0%,#2E7D32_100%)] px-5 py-4 text-base font-semibold text-white shadow-[0_4px_16px_rgba(27,94,32,0.4)]"
-          >
-            <div className="flex items-center justify-center gap-3">
-              <MessageCircle size={20} />
-              <div className="text-left">
-                <span>Contactar por WhatsApp</span>
-                <p className="text-[12px] text-white/80">Te responderá {vendor.name}</p>
-              </div>
-            </div>
-          </button>
-        </div>
+      <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 500, padding: '16px 20px', background: 'white', borderTop: '1px solid #E5E7EB', zIndex: 50, boxSizing: 'border-box' }}>
+        <button
+          onClick={() => {
+            setCurrentStep(4);
+            const message = `Hola, vi tu leña en LumeApp. Me interesa ${vendor.species} a $${vendor.price.toLocaleString('es-CL')}/m³. ¿Podemos coordinar entrega de ${selectedMeters}m³?`;
+            const whatsappUrl = `https://wa.me/56900000000?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+          }}
+          style={{
+            width: '100%',
+            borderRadius: 14,
+            background: 'linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%)',
+            color: 'white',
+            fontWeight: 700,
+            fontSize: 16,
+            padding: '16px',
+            border: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 10,
+            boxShadow: '0 4px 16px rgba(27,94,32,0.4)',
+            cursor: 'pointer',
+          }}
+        >
+          <MessageCircle size={20} />
+          Contactar por WhatsApp
+        </button>
       </div>
     </div>
   );
 }
-
