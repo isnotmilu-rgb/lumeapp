@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
@@ -32,16 +32,43 @@ export function SellerProfile() {
   const { setShowComingSoon, setCurrentStep } = useApp();
   const vendor = vendors.find(vendor => vendor.id === Number(id));
   const [selectedMeters, setSelectedMeters] = useState(1);
-  const woodTypes = ['Eucaliptus', 'Roble', 'Coigüe'];
-  const [selectedWood, setSelectedWood] = useState<string>(vendor?.species ?? woodTypes[0]);
+  const woodTypes = vendor?.woods.map(wood => wood.name) ?? ['Eucaliptus', 'Roble', 'Coigüe'];
+  const [selectedWood, setSelectedWood] = useState<string>(vendor?.woods?.[0]?.name ?? woodTypes[0]);
+  const selectedWoodOption = vendor?.woods.find(wood => wood.name === selectedWood) ?? vendor?.woods?.[0];
+  const totalPrice = selectedWoodOption ? selectedWoodOption.price * selectedMeters : 0;
+  const stockStatus = selectedWoodOption
+    ? selectedWoodOption.available <= 4
+      ? 'Stock bajo'
+      : selectedWoodOption.available <= 10
+      ? 'Stock limitado'
+      : 'En stock'
+    : '';
+  const deliveryStatus = selectedWoodOption
+    ? selectedWoodOption.available >= 10
+      ? 'Entrega hoy'
+      : selectedWoodOption.available >= 5
+      ? 'Entrega 24h'
+      : 'Entrega 48h'
+    : '';
+  const [woodImageLoaded, setWoodImageLoaded] = useState(false);
 
   const sendWhatsApp = () => {
     setCurrentStep(4);
-    const total = (vendor?.price ?? 0) * selectedMeters;
-    const message = `Hola, vi tu publicación en LumeApp. Me interesa comprar ${selectedMeters}m³ de ${selectedWood} con ${vendor?.name} por un total de $${total.toLocaleString('es-CL')}. ¿Podemos coordinar entrega?`;
+    const total = selectedWoodOption ? selectedWoodOption.price * selectedMeters : 0;
+    const message = `Hola, vi tu publicación en LumeApp. Me interesa comprar ${selectedMeters}m³ de ${selectedWoodOption?.name ?? selectedWood} con ${vendor?.name} por un total de $${total.toLocaleString('es-CL')}. ¿Podemos coordinar entrega?`;
     const whatsappUrl = `https://wa.me/56900000000?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
+
+  useEffect(() => {
+    setWoodImageLoaded(false);
+  }, [selectedWood]);
+
+  useEffect(() => {
+    if (selectedWoodOption && selectedMeters > selectedWoodOption.available) {
+      setSelectedMeters(selectedWoodOption.available);
+    }
+  }, [selectedWoodOption, selectedMeters]);
 
   if (!vendor) {
     return (
@@ -59,7 +86,6 @@ export function SellerProfile() {
     );
   }
 
-  const totalPrice = vendor.price * selectedMeters;
   const measurements = [
     {
       date: '10 May 2026',
@@ -98,46 +124,60 @@ export function SellerProfile() {
       </div>
 
       <div className="mx-auto w-full max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8">
-        <section className="rounded-[28px] bg-gradient-to-r from-[#081004] via-[#0f3d12] to-[#1B5E20] p-4 sm:p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div className="space-y-4 max-w-3xl">
+        <section className="relative overflow-hidden rounded-[28px] bg-slate-950 p-6 sm:p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
+          <img src={vendor.heroImage} alt={`${vendor.name} hero`} className="absolute inset-0 h-full w-full object-cover opacity-80" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#081004]/90 via-[#0f3d12]/80 to-[#1B5E20]/80" />
+          <div className="relative grid gap-6 lg:grid-cols-[1.45fr_1fr] lg:items-center">
+            <div className="space-y-5">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-[#D9F3C2] shadow-sm">
                 <CheckCircle size={16} />
                 Proveedor verificado
               </div>
-              <div>
+
+              <div className="max-w-3xl">
                 <h1 className="text-4xl font-semibold text-white sm:text-5xl">{vendor.name}</h1>
-                <p className="mt-3 max-w-2xl text-base text-white/85 sm:text-lg">
+                <p className="mt-4 text-base leading-8 text-white/85 sm:text-lg">
                   Leña seca certificada, entrega rápida y medición confiable. Navega el stock, revisa el historial y coordina la compra en un solo lugar.
                 </p>
               </div>
+
               <div className="grid gap-3 sm:grid-cols-3">
                 <div className="rounded-3xl bg-white/10 px-4 py-4 text-sm text-white">
                   <p className="text-xs uppercase tracking-[0.2em] text-white/70">Precio</p>
-                  <p className="mt-2 text-xl font-semibold">${vendor.price.toLocaleString('es-CL')} / m³</p>
+                  <p className="mt-2 text-xl font-semibold">${selectedWoodOption?.price.toLocaleString('es-CL')} / m³</p>
                 </div>
                 <div className="rounded-3xl bg-white/10 px-4 py-4 text-sm text-white">
                   <p className="text-xs uppercase tracking-[0.2em] text-white/70">Stock</p>
-                  <p className="mt-2 text-xl font-semibold">{vendor.available} m³</p>
+                  <p className="mt-2 text-xl font-semibold">{selectedWoodOption?.available} m³</p>
                 </div>
                 <div className="rounded-3xl bg-white/10 px-4 py-4 text-sm text-white">
                   <p className="text-xs uppercase tracking-[0.2em] text-white/70">Reseñas</p>
                   <p className="mt-2 text-xl font-semibold">{vendor.reviews}</p>
                 </div>
               </div>
+
+              <div className="flex flex-wrap gap-3">
+                <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/80">{deliveryStatus}</span>
+                <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/80">Medición NCh 2965</span>
+                <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/80">Leña premium</span>
+              </div>
             </div>
 
-            <div className="rounded-[28px] border border-white/10 bg-white/10 p-5 text-sm text-white shadow-xl backdrop-blur-sm sm:max-w-sm lg:ml-6">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-white/70">Ubicación</p>
-                  <p className="mt-2 text-base font-semibold">{vendor.address}</p>
+            <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-2xl">
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/75">Perfil premium</p>
+              <div className="mt-5 grid gap-4">
+                <div className="rounded-3xl bg-white/10 p-4 text-white">
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/70">Especie principal</p>
+                  <p className="mt-3 text-xl font-semibold">{vendor.species}</p>
                 </div>
-                <div className="rounded-full bg-white/15 px-3 py-2 text-xs font-semibold text-white">Ambos modos</div>
-              </div>
-              <div className="mt-5 flex flex-wrap gap-2 text-xs text-white/80">
-                <span className="rounded-full bg-white/10 px-3 py-2">{vendor.certified ? 'Certificación activa' : 'Sin certificación'}</span>
-                <span className="rounded-full bg-white/10 px-3 py-2">{vendor.humidity !== null ? `${vendor.humidity}% humedad` : 'Humedad sin medir'}</span>
+                <div className="rounded-3xl bg-white/10 p-4 text-white">
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/70">Ubicación</p>
+                  <p className="mt-3 text-xl font-semibold">{vendor.address}</p>
+                </div>
+                <div className="rounded-3xl bg-white/10 p-4 text-white">
+                  <p className="text-xs uppercase tracking-[0.2em] text-white/70">Distancia</p>
+                  <p className="mt-3 text-xl font-semibold">{vendor.distance.toFixed(1)} km</p>
+                </div>
               </div>
             </div>
           </div>
@@ -151,7 +191,7 @@ export function SellerProfile() {
                   <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Perfil del proveedor</p>
                   <h2 className="mt-3 text-2xl font-semibold text-slate-900">Todo lo que necesitas saber</h2>
                 </div>
-                <div className="rounded-3xl bg-[#F9FBE7] px-4 py-2 text-sm font-semibold text-[#1B5E20]">{vendor.species}</div>
+                <div className="rounded-3xl bg-[#F9FBE7] px-4 py-2 text-sm font-semibold text-[#1B5E20]">{selectedWoodOption?.name}</div>
               </div>
 
               <div className="mt-6 grid gap-4 sm:grid-cols-3">
@@ -160,12 +200,12 @@ export function SellerProfile() {
                   <p className="mt-3 text-3xl font-semibold text-[#1B5E20]">{vendor.rating}</p>
                 </div>
                 <div className="rounded-3xl border border-slate-100 bg-[#F9FBE7] p-5">
-                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Última medición</p>
-                  <p className="mt-3 text-3xl font-semibold text-[#1B5E20]">{vendor.humidity ?? '—'}%</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Humedad</p>
+                  <p className="mt-3 text-3xl font-semibold text-[#1B5E20]">{selectedWoodOption?.humidity ?? '—'}%</p>
                 </div>
                 <div className="rounded-3xl border border-slate-100 bg-[#F9FBE7] p-5">
                   <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Stock</p>
-                  <p className="mt-3 text-3xl font-semibold text-[#1B5E20]">{vendor.available} m³</p>
+                  <p className="mt-3 text-3xl font-semibold text-[#1B5E20]">{selectedWoodOption?.available} m³</p>
                 </div>
               </div>
 
@@ -248,7 +288,17 @@ export function SellerProfile() {
                   ))}
                 </div>
 
-                <label className="block text-xs text-slate-500 mb-2">Cantidad (m³)</label>
+                <div className="overflow-hidden rounded-2xl bg-slate-50 shadow-xl transition duration-500 ease-out">
+                  <img
+                    key={selectedWood}
+                    src={selectedWoodOption?.imageUrl}
+                    alt={`Madera ${selectedWoodOption?.name}`}
+                    onLoad={() => setWoodImageLoaded(true)}
+                    className={`h-56 w-full object-cover transition-all duration-500 ease-out ${woodImageLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+                  />
+                </div>
+
+                <label className="block text-xs text-slate-500 mb-2 mt-4">Cantidad (m³)</label>
                 <div className="flex items-center gap-3 mb-4">
                   <button
                     onClick={() => setSelectedMeters(m => Math.max(1, m - 1))}
@@ -257,7 +307,7 @@ export function SellerProfile() {
                   >−</button>
                   <div className="min-w-[70px] text-center text-2xl font-semibold">{selectedMeters}</div>
                   <button
-                    onClick={() => setSelectedMeters(m => Math.min(vendor.available, m + 1))}
+                    onClick={() => setSelectedMeters(m => Math.min(selectedWoodOption?.available ?? m, m + 1))}
                     className="h-10 w-10 rounded-full bg-[#2E7D32] text-white flex items-center justify-center text-lg"
                     aria-label="Aumentar cantidad"
                   >+</button>
@@ -265,12 +315,12 @@ export function SellerProfile() {
 
                 <div className="flex items-center justify-between mb-4">
                   <div className="text-xs text-slate-500">Precio unitario</div>
-                  <div className="font-semibold">${vendor.price.toLocaleString('es-CL')} / m³</div>
+                  <div className="font-semibold">${selectedWoodOption?.price.toLocaleString('es-CL')} / m³</div>
                 </div>
 
                 <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
                   <div className="text-sm text-slate-600">Total estimado</div>
-                  <div className="text-xl font-semibold text-[#1B5E20]">${((vendor.price ?? 0) * selectedMeters).toLocaleString('es-CL')}</div>
+                  <div className="text-xl font-semibold text-[#1B5E20]">${totalPrice.toLocaleString('es-CL')}</div>
                 </div>
 
                 <button

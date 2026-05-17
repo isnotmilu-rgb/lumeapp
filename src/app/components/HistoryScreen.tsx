@@ -77,81 +77,91 @@ export function HistoryScreen() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F9FBE7]">
-      {/* Status Bar */}
-      <div className="bg-[#1B5E20] text-white px-4 py-2 flex justify-between items-center text-xs flex-shrink-0">
+    <div className="min-h-screen bg-[#F9FBE7]">
+      <div className="bg-[#1B5E20] text-white px-4 py-2 flex justify-between items-center text-xs">
         <span>9:41</span>
         <span className="font-bold">LumeApp</span>
       </div>
 
-      {/* Top Bar */}
-      <div className="bg-[#2E7D32] text-white px-4 py-4 flex items-center gap-3 flex-shrink-0">
-        <button onClick={() => navigate(-1)} className="hover:bg-white/10 p-1 rounded-full transition-colors">
+      <div className="bg-[#2E7D32] text-white px-4 py-4 flex items-center gap-3">
+        <button onClick={() => navigate(-1)} className="p-2 rounded-2xl bg-white/10 hover:bg-white/15 transition">
           <ArrowLeft size={20} />
         </button>
         <div>
-          <h1 className="font-bold">Historial completo</h1>
-          <p className="text-[#A5D6A7] text-xs">{vendor.name}</p>
+          <h1 className="text-lg font-bold">Historial completo</h1>
+          <p className="text-sm text-white/85">Registro de mediciones para {vendor.name}</p>
         </div>
       </div>
 
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
-        {/* Info Card */}
-        <div className="p-4">
-        <div className="bg-[#E8F5E9] border-l-4 border-[#2E7D32] rounded-lg p-4 flex gap-3">
-          <Info size={20} className="text-[#2E7D32] flex-shrink-0 mt-0.5" />
-          <div>
-            <h3 className="font-bold text-[#1B5E20] mb-1">Sobre la Norma NCh 2965</h3>
-            <p className="text-sm text-gray-700">
-              Esta norma chilena certifica que la leña con menos de 25% de humedad es considerada seca
-              y apta para uso doméstico. Las mediciones son realizadas con dispositivos IoT certificados.
-            </p>
+      <div className="px-4 pb-10">
+        <div className="mt-4 overflow-hidden rounded-[28px] bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
+          <img src={vendor.imageUrl} alt={`${vendor.name}`} className="h-56 w-full object-cover" />
+          <div className="p-5">
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-[0.2em] text-[#2E7D32]">Proveedor</p>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-900">{vendor.name}</h2>
+                <p className="mt-2 text-sm text-slate-500">{vendor.address}</p>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-3xl bg-slate-50 p-4 text-center">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Calificación</p>
+                  <p className="mt-2 text-2xl font-semibold text-[#1B5E20]">{vendor.rating}</p>
+                </div>
+                <div className="rounded-3xl bg-slate-50 p-4 text-center">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Stock</p>
+                  <p className="mt-2 text-2xl font-semibold text-[#1B5E20]">{vendor.available} m³</p>
+                </div>
+                <div className="rounded-3xl bg-slate-50 p-4 text-center">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Humedad</p>
+                  <p className="mt-2 text-2xl font-semibold text-[#1B5E20]">{vendor.humidity ?? '—'}%</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-        {/* History List */}
-        <div className="px-4 pb-4">
-          <h2 className="font-bold text-[#1B5E20] mb-3">Todas las mediciones</h2>
-          <div className="space-y-2">
+        <div className="mt-6 rounded-[28px] bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-slate-900">Todas las mediciones</h2>
+              <p className="mt-1 text-sm text-slate-500">Revisa el historial completo de humedad y certificados.</p>
+            </div>
+            <span className="rounded-full bg-[#E8F5E9] px-3 py-2 text-xs font-semibold text-[#1B5E20]">{(history?.measurements ?? []).length} entradas</span>
+          </div>
+
+          <div className="mt-5 space-y-4">
             {(history?.measurements ?? []).map((measurement, index) => (
               <div
                 key={index}
-                className={`bg-white rounded-xl p-4 border ${
-                  measurement.status === 'Vigente' ? 'border-[#2E7D32]' : 'border-gray-200'
-                }`}
+                className={`rounded-[24px] border p-4 ${measurement.status === 'Vigente' ? 'border-[#2E7D32] bg-[#F0FFF4]' : 'border-slate-200 bg-white'}`}
               >
-                <div className="flex justify-between items-start mb-2">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
-                    <div className="font-bold text-[#1B5E20]">{measurement.date}</div>
-                    <div className="text-xs text-gray-500">{measurement.time}</div>
+                    <div className="font-semibold text-[#1B5E20]">{measurement.date}</div>
+                    <div className="text-xs text-slate-500">{measurement.time}</div>
                   </div>
-                  {measurement.status === 'Vigente' ? (
-                    <span className="bg-[#2E7D32] text-white text-xs px-2 py-1 rounded-full">
-                      Vigente
-                    </span>
-                  ) : (
-                    <span className="bg-gray-300 text-gray-600 text-xs px-2 py-1 rounded-full">
-                      Expirada
-                    </span>
-                  )}
+                  <span className={`inline-flex rounded-full px-3 py-1 text-[11px] font-semibold uppercase ${measurement.status === 'Vigente' ? 'bg-[#ECFDF5] text-[#047857]' : 'bg-[#F3F4F6] text-slate-600'}`}>
+                    {measurement.status}
+                  </span>
                 </div>
 
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-2xl font-bold text-[#2E7D32]">{measurement.humidity}%</span>
-                  <span className="text-sm text-gray-600">{measurement.species}</span>
-                </div>
-
-                <div className="bg-[#E8F5E9] rounded-full h-2 mb-2 overflow-hidden">
-                  <div
-                    className="bg-[#2E7D32] h-full rounded-full transition-all"
-                    style={{ width: `${measurement.humidity}%` }}
-                  ></div>
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-3xl font-semibold text-[#2E7D32]">{measurement.humidity}%</p>
+                    <p className="text-sm text-slate-500">{measurement.species}</p>
+                  </div>
+                  <div className="h-2.5 w-full rounded-full bg-slate-100 overflow-hidden sm:max-w-[280px]">
+                    <div
+                      className="h-full rounded-full bg-[#2E7D32] transition-all"
+                      style={{ width: `${measurement.humidity}%` }}
+                    />
+                  </div>
                 </div>
 
                 {measurement.verified && (
-                  <div className="flex items-center gap-2 text-xs text-[#2E7D32]">
+                  <div className="mt-4 flex items-center gap-2 text-xs text-[#2E7D32]">
                     <CheckCircle size={14} />
                     <span>Certificado por dispositivo IoT</span>
                   </div>
