@@ -1,16 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, MessageCircle, Phone, MapPin } from 'lucide-react';
 import { useApp } from '../App';
-
-const vendors = [
-  { id: 1, name: 'Leñas Boyeco', initials: 'LB', humidity: 17, certified: true, species: 'Eucaliptus', available: 15, price: 45000 },
-  { id: 2, name: 'Maderera Verde', initials: 'MV', humidity: 21, certified: true, species: 'Roble', available: 20, price: 52000 },
-  { id: 3, name: 'Juan Rojas', initials: 'JR', humidity: null, certified: false, species: 'Coigüe', available: 10, price: 33000 },
-  { id: 4, name: 'Leñas del Sur', initials: 'LS', humidity: 19, certified: true, species: 'Eucaliptus', available: 25, price: 48000 },
-  { id: 5, name: 'Comercial Aromo', initials: 'CA', humidity: 18, certified: true, species: 'Aromo', available: 12, price: 41000 },
-  { id: 6, name: 'Don Pedro Leña', initials: 'DP', humidity: null, certified: false, species: 'Roble', available: 8, price: 30000 },
-  { id: 7, name: 'Forestal Cautín', initials: 'FC', humidity: 23, certified: true, species: 'Roble', available: 18, price: 44000 },
-];
+import { vendors } from '../data/vendors';
 
 export function ContactScreen() {
   const navigate = useNavigate();

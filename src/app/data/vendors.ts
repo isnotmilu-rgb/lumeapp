@@ -1,0 +1,147 @@
+export type Vendor = {
+  id: number;
+  name: string;
+  initials: string;
+  humidity: number | null;
+  certified: boolean;
+  species: string;
+  available: number;
+  price: number;
+  address: string;
+  rating: number;
+  reviews: number;
+  daysAgo: number | null;
+  distance: number;
+  zone: 'temuco' | 'padre-las-casas' | 'alrededores';
+  lat: number;
+  lng: number;
+};
+
+export const vendors: Vendor[] = [
+  {
+    id: 1,
+    name: 'Leñas Boyeco',
+    initials: 'LB',
+    humidity: 17,
+    certified: true,
+    species: 'Eucaliptus',
+    available: 15,
+    price: 45000,
+    address: 'Av. Alemania 850, Temuco',
+    rating: 4.9,
+    reviews: 38,
+    daysAgo: 1,
+    distance: 2.3,
+    zone: 'temuco',
+    lat: -38.7259,
+    lng: -72.5804,
+  },
+  {
+    id: 2,
+    name: 'Maderera Verde',
+    initials: 'MV',
+    humidity: 21,
+    certified: true,
+    species: 'Roble',
+    available: 20,
+    price: 52000,
+    address: 'Rudecindo Ortega 234, Temuco',
+    rating: 4.6,
+    reviews: 24,
+    daysAgo: 2,
+    distance: 3.1,
+    zone: 'temuco',
+    lat: -38.7459,
+    lng: -72.6004,
+  },
+  {
+    id: 3,
+    name: 'Juan Rojas',
+    initials: 'JR',
+    humidity: null,
+    certified: false,
+    species: 'Coigüe',
+    available: 10,
+    price: 33000,
+    address: 'Los Boldos 123, Padre Las Casas',
+    rating: 3.8,
+    reviews: 11,
+    daysAgo: null,
+    distance: 5.2,
+    zone: 'padre-las-casas',
+    lat: -38.7659,
+    lng: -72.6204,
+  },
+  {
+    id: 4,
+    name: 'Leñas del Sur',
+    initials: 'LS',
+    humidity: 19,
+    certified: true,
+    species: 'Eucaliptus',
+    available: 25,
+    price: 48000,
+    address: 'Balmaceda 456, Padre Las Casas',
+    rating: 4.7,
+    reviews: 29,
+    daysAgo: 5,
+    distance: 4.5,
+    zone: 'padre-las-casas',
+    lat: -38.7559,
+    lng: -72.6404,
+  },
+  {
+    id: 5,
+    name: 'Comercial Aromo',
+    initials: 'CA',
+    humidity: 18,
+    certified: true,
+    species: 'Aromo',
+    available: 12,
+    price: 41000,
+    address: 'Caupolicán 789, Temuco',
+    rating: 4.5,
+    reviews: 17,
+    daysAgo: 1,
+    distance: 1.8,
+    zone: 'alrededores',
+    lat: -38.7159,
+    lng: -72.5604,
+  },
+  {
+    id: 6,
+    name: 'Don Pedro Leña',
+    initials: 'DP',
+    humidity: null,
+    certified: false,
+    species: 'Roble',
+    available: 8,
+    price: 30000,
+    address: 'Las Encinas 321, Padre Las Casas',
+    rating: 3.7,
+    reviews: 5,
+    daysAgo: null,
+    distance: 6.7,
+    zone: 'alrededores',
+    lat: -38.7059,
+    lng: -72.5404,
+  },
+  {
+    id: 7,
+    name: 'Forestal Cautín',
+    initials: 'FC',
+    humidity: 23,
+    certified: true,
+    species: 'Roble',
+    available: 18,
+    price: 44000,
+    address: 'Ruta 5 Norte km 8, Temuco',
+    rating: 4.5,
+    reviews: 18,
+    daysAgo: 5,
+    distance: 3.8,
+    zone: 'temuco',
+    lat: -38.7359,
+    lng: -72.6104,
+  },
+];

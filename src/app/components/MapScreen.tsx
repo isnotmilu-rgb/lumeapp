@@ -5,16 +5,7 @@ import { useApp } from '../App';
 import { MapView } from './MapView';
 import { analyticsService } from '../../services/analytics';
 import L from 'leaflet';
-
-const vendors = [
-  { id: 1, name: 'Leñas Boyeco', initials: 'LB', humidity: 17, certified: true, zone: 'temuco', x: 26, y: 33, species: 'Eucaliptus', price: 45000, daysAgo: 1, lat: -38.7259, lng: -72.5804 },
-  { id: 2, name: 'Maderera Verde', initials: 'MV', humidity: 21, certified: true, zone: 'temuco', x: 44, y: 24, species: 'Roble', price: 52000, daysAgo: 2, lat: -38.7459, lng: -72.6004 },
-  { id: 3, name: 'Juan Rojas', initials: 'JR', humidity: null, certified: false, zone: 'padre-las-casas', x: 66, y: 43, species: 'Coigüe', price: 33000, daysAgo: null, lat: -38.7659, lng: -72.6204 },
-  { id: 4, name: 'Leñas del Sur', initials: 'LS', humidity: 19, certified: true, zone: 'padre-las-casas', x: 72, y: 57, species: 'Eucaliptus', price: 48000, daysAgo: 5, lat: -38.7559, lng: -72.6404 },
-  { id: 5, name: 'Comercial Aromo', initials: 'CA', humidity: 18, certified: true, zone: 'alrededores', x: 34, y: 71, species: 'Aromo', price: 41000, daysAgo: 1, lat: -38.7159, lng: -72.5604 },
-  { id: 6, name: 'Don Pedro Leña', initials: 'DP', humidity: null, certified: false, zone: 'alrededores', x: 14, y: 62, species: 'Roble', price: 30000, daysAgo: null, lat: -38.7059, lng: -72.5404 },
-  { id: 7, name: 'Forestal Cautín', initials: 'FC', humidity: 23, certified: true, zone: 'temuco', x: 58, y: 42, species: 'Roble', price: 44000, daysAgo: 5, lat: -38.7359, lng: -72.6104 },
-];
+import { vendors } from '../data/vendors';
 
 const SPECIES_OPTIONS = ['Eucaliptus', 'Roble', 'Coigüe', 'Aromo', 'Raulí'];
 const ZONE_OPTIONS = ['Temuco centro', 'Padre Las Casas', 'Lautaro', 'Freire', 'Vilcún'];
@@ -209,7 +200,8 @@ export function MapScreen() {
                 analyticsService.trackMapInteraction('marker_click', { markerId, markerType: 'user_location' });
                 return;
               }
-              const v = vendors.find(x => x.id === markerId);
+              const numericId = typeof markerId === 'string' ? Number(markerId) : markerId;
+              const v = vendors.find(x => x.id === numericId);
               if (v) {
                 setSelectedVendor(v);
                 analyticsService.trackVendorInteraction(v.id.toString(), 'marker_clicked', { name: v.name, certified: v.certified, humidity: v.humidity, price: v.price });

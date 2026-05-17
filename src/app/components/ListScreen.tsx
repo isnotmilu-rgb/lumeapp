@@ -1,17 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, List, User, Star, TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { vendors } from '../data/vendors';
 
 const AVG_PRICE = 43167;
-const vendors = [
-  { id: 1, name: 'Leñas Boyeco', initials: 'LB', humidity: 17, certified: true, species: 'Eucaliptus', price: 45000, distance: 2.3, rating: 4.8, reviews: 34, daysAgo: 1 },
-  { id: 2, name: 'Maderera Verde', initials: 'MV', humidity: 21, certified: true, species: 'Roble', price: 52000, distance: 3.1, rating: 4.6, reviews: 21, daysAgo: 2 },
-  { id: 3, name: 'Juan Rojas', initials: 'JR', humidity: null, certified: false, species: 'Coigüe', price: 33000, distance: 5.2, rating: 3.9, reviews: 8, daysAgo: null },
-  { id: 4, name: 'Leñas del Sur', initials: 'LS', humidity: 19, certified: true, species: 'Eucaliptus', price: 48000, distance: 4.5, rating: 4.7, reviews: 29, daysAgo: 3 },
-  { id: 5, name: 'Comercial Aromo', initials: 'CA', humidity: 18, certified: true, species: 'Aromo', price: 41000, distance: 1.8, rating: 4.5, reviews: 17, daysAgo: 1 },
-  { id: 6, name: 'Don Pedro Leña', initials: 'DP', humidity: null, certified: false, species: 'Roble', price: 30000, distance: 6.7, rating: 3.7, reviews: 5, daysAgo: null },
-  { id: 7, name: 'Forestal Cautín', initials: 'FC', humidity: 23, certified: true, species: 'Roble', price: 44000, distance: 3.8, rating: 4.5, reviews: 18, daysAgo: 5 },
-];
 
 const Stars = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-0.5">
