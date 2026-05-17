@@ -32,10 +32,13 @@ export function SellerProfile() {
   const { setShowComingSoon, setCurrentStep } = useApp();
   const vendor = vendors.find(vendor => vendor.id === Number(id));
   const [selectedMeters, setSelectedMeters] = useState(1);
+  const woodTypes = ['Eucaliptus', 'Roble', 'Coigüe'];
+  const [selectedWood, setSelectedWood] = useState<string>(vendor?.species ?? woodTypes[0]);
 
   const sendWhatsApp = () => {
     setCurrentStep(4);
-    const message = `Hola, vi tu leña en LumeApp. Me interesa ${vendor?.species} a $${vendor?.price.toLocaleString('es-CL')}/m³. ¿Podemos coordinar entrega de ${selectedMeters}m³?`;
+    const total = (vendor?.price ?? 0) * selectedMeters;
+    const message = `Hola, vi tu publicación en LumeApp. Me interesa comprar ${selectedMeters}m³ de ${selectedWood} con ${vendor?.name} por un total de $${total.toLocaleString('es-CL')}. ¿Podemos coordinar entrega?`;
     const whatsappUrl = `https://wa.me/56900000000?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
@@ -80,6 +83,20 @@ export function SellerProfile() {
 
   return (
     <div className="bg-[#F5F7F4] text-slate-900">
+      {/* Floating / Sticky Back Buttons */}
+      <div className="mx-auto w-full max-w-[1280px] px-4 py-2 sm:px-6 lg:px-8">
+        <div className="lg:hidden sticky top-0 z-50 bg-gradient-to-b from-white/90 to-transparent py-2">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white shadow-sm text-sm font-semibold">
+            <ArrowLeft size={16} /> Volver
+          </button>
+        </div>
+        <div className="hidden lg:block">
+          <button onClick={() => navigate(-1)} aria-label="Volver" className="absolute left-6 top-6 z-50 hidden lg:flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1B5E20] shadow-sm transition hover:shadow-md">
+            <ArrowLeft size={18} />
+          </button>
+        </div>
+      </div>
+
       <div className="mx-auto w-full max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8">
         <section className="rounded-[32px] bg-gradient-to-r from-[#081004] via-[#0f3d12] to-[#1B5E20] p-6 sm:p-8 shadow-[0_30px_80px_rgba(15,23,42,0.12)]">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -216,36 +233,61 @@ export function SellerProfile() {
 
           <aside className="space-y-6">
             <div className="rounded-[28px] bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.08)]">
-              <p className="text-base font-semibold text-slate-900">Resumen de compra</p>
-              <div className="mt-5 space-y-4 text-sm text-slate-600">
-                <div className="flex items-center justify-between rounded-2xl bg-slate-50 p-4">
-                  <span>Especie</span>
-                  <span className="font-semibold text-slate-900">{vendor.species}</span>
+              <p className="text-base font-semibold text-slate-900">Comprar</p>
+
+              <div className="mt-4 text-sm text-slate-700">
+                <label className="block text-xs text-slate-500 mb-2">Tipo de madera</label>
+                <div className="flex gap-2 mb-4">
+                  {woodTypes.map((w) => (
+                    <button
+                      key={w}
+                      onClick={() => setSelectedWood(w)}
+                      className={`px-3 py-2 rounded-lg border ${selectedWood === w ? 'bg-[#E8F5E9] border-[#2E7D32] text-[#1B5E20]' : 'bg-white border-gray-200 text-slate-700'}`}>
+                      {w}
+                    </button>
+                  ))}
                 </div>
-                <div className="flex items-center justify-between rounded-2xl bg-slate-50 p-4">
-                  <span>Precio unitario</span>
-                  <span className="font-semibold text-slate-900">${vendor.price.toLocaleString('es-CL')}</span>
+
+                <label className="block text-xs text-slate-500 mb-2">Cantidad (m³)</label>
+                <div className="flex items-center gap-3 mb-4">
+                  <button
+                    onClick={() => setSelectedMeters(m => Math.max(1, m - 1))}
+                    className="h-10 w-10 rounded-full border flex items-center justify-center text-lg"
+                    aria-label="Disminuir cantidad"
+                  >−</button>
+                  <div className="min-w-[70px] text-center text-2xl font-semibold">{selectedMeters}</div>
+                  <button
+                    onClick={() => setSelectedMeters(m => Math.min(vendor.available, m + 1))}
+                    className="h-10 w-10 rounded-full bg-[#2E7D32] text-white flex items-center justify-center text-lg"
+                    aria-label="Aumentar cantidad"
+                  >+</button>
                 </div>
-                <div className="flex items-center justify-between rounded-2xl bg-slate-50 p-4">
-                  <span>Stock disponible</span>
-                  <span className="font-semibold text-slate-900">{vendor.available}m³</span>
+
+                <div className="flex items-center justify-between mb-4">
+                  <div className="text-xs text-slate-500">Precio unitario</div>
+                  <div className="font-semibold">${vendor.price.toLocaleString('es-CL')} / m³</div>
                 </div>
+
+                <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
+                  <div className="text-sm text-slate-600">Total estimado</div>
+                  <div className="text-xl font-semibold text-[#1B5E20]">${((vendor.price ?? 0) * selectedMeters).toLocaleString('es-CL')}</div>
+                </div>
+
+                <button
+                  onClick={sendWhatsApp}
+                  className="w-full mt-2 inline-flex items-center justify-center gap-3 rounded-[14px] bg-gradient-to-r from-[#1B5E20] to-[#2E7D32] px-4 py-3 text-sm font-semibold text-white shadow transition hover:from-[#25672b]"
+                >
+                  <MessageCircle size={18} /> Contactar por WhatsApp
+                </button>
               </div>
-              <button
-                onClick={sendWhatsApp}
-                className="mt-6 flex w-full items-center justify-center gap-3 rounded-[18px] bg-gradient-to-r from-[#1B5E20] to-[#2E7D32] px-4 py-4 text-sm font-semibold text-white shadow-xl transition hover:from-[#25672b] hover:to-[#1B5E20]"
-              >
-                <MessageCircle size={20} />
-                Contactar por WhatsApp
-              </button>
             </div>
 
-            <div className="rounded-[28px] bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.08)]">
-              <p className="text-base font-semibold text-slate-900">Acciones rápidas</p>
-              <div className="mt-5 space-y-4 text-sm text-slate-600">
-                <div className="rounded-2xl bg-slate-50 p-4">Precio transparente y sin sorpresas.</div>
-                <div className="rounded-2xl bg-slate-50 p-4">Coordina entrega por WhatsApp.</div>
-                <div className="rounded-2xl bg-slate-50 p-4">Historial de mediciones disponible.</div>
+            <div className="rounded-[20px] bg-white p-4 shadow-sm">
+              <p className="text-sm font-semibold text-slate-900">Detalles rápidos</p>
+              <div className="mt-3 space-y-2 text-sm text-slate-600">
+                <div className="rounded-2xl bg-slate-50 p-3">Entrega estimada en 24-48h</div>
+                <div className="rounded-2xl bg-slate-50 p-3">Medición certificada NCh 2965</div>
+                <div className="rounded-2xl bg-slate-50 p-3">Retiro o envío disponible</div>
               </div>
             </div>
           </aside>
