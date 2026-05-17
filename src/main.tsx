@@ -1,9 +1,9 @@
+import { inject } from '@vercel/analytics';
+inject();
 
-  import { createRoot } from "react-dom/client";
+import { createRoot } from "react-dom/client";
 import React from "react";
 import App from "./app/App.tsx";
-import "./styles/index.css";
-import "./styles/lumeapp.css";
 
 // Error Boundary for catching React errors
 class ErrorBoundary extends React.Component<
@@ -23,7 +23,7 @@ class ErrorBoundary extends React.Component<
     console.error("React Error Boundary caught:", error);
   }
 
-  render() {
+  render(): React.ReactNode {
     if (this.state.hasError) {
       return (
         <div style={{
@@ -109,4 +109,3 @@ ${error instanceof Error ? error.message : String(error)}
     </div>
   `;
 }
-  
