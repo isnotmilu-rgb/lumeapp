@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useState, createContext, useContext, useEffect, type ReactNode } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { SplashScreen } from './components/SplashScreen';
 import { Onboarding } from './components/Onboarding';
 import { MapScreen } from './components/MapScreen';
@@ -138,6 +139,7 @@ export default function App() {
           {showComingSoon && <ComingSoonModal />}
         </div>
       </BrowserRouter>
+      <Analytics />
     </AppContext.Provider>
   );
 }
