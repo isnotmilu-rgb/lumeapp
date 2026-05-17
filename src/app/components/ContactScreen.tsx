@@ -11,7 +11,7 @@ export function ContactScreen() {
 
   if (!vendor) return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#F9FBE7] px-4 py-10">
-      <div className="rounded-[28px] bg-white px-6 py-8 shadow-[0_24px_60px_rgba(15,23,42,0.08)] text-center">
+      <div className="rounded-[32px] bg-white/95 px-6 py-8 shadow-[0_35px_90px_rgba(15,23,42,0.14)] backdrop-blur-sm text-center">
         <p className="text-lg font-semibold text-slate-900">Vendedor no encontrado</p>
         <button onClick={() => navigate(-1)} className="mt-6 rounded-[18px] bg-[#1B5E20] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#165a1c]">
           Volver
@@ -55,7 +55,7 @@ export function ContactScreen() {
             </div>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <div className="rounded-3xl bg-slate-50 p-4">
+              <div className="rounded-[28px] bg-slate-50 p-4">
                 <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Especie</p>
                 <p className="mt-2 font-semibold text-slate-900">{vendor.species}</p>
               </div>
@@ -90,19 +90,19 @@ export function ContactScreen() {
           <div className="space-y-3">
             <button
               onClick={() => { setCurrentStep(5); setShowComingSoon(true); }}
-              className="w-full rounded-[18px] bg-[#25D366] py-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1ebd5d] flex items-center justify-center gap-2"
+              className="w-full rounded-[28px] bg-[#25D366] py-4 text-sm font-semibold text-white shadow-[0_18px_40px_rgba(37,211,102,0.22)] transition hover:bg-[#1ebd5d] flex items-center justify-center gap-2"
             >
               <MessageCircle size={20} /> Abrir WhatsApp
             </button>
             <button
               onClick={() => setShowComingSoon(true)}
-              className="w-full rounded-[18px] border-2 border-[#2E7D32] bg-white py-4 text-sm font-semibold text-[#2E7D32] transition hover:bg-[#f3f9f2] flex items-center justify-center gap-2"
+              className="w-full rounded-[28px] border-2 border-[#2E7D32] bg-white py-4 text-sm font-semibold text-[#2E7D32] transition hover:bg-[#f3f9f2] flex items-center justify-center gap-2"
             >
               <Phone size={18} /> Llamar al vendedor
             </button>
             <button
               onClick={() => navigate(`/seller/${id}`)}
-              className="w-full rounded-[18px] border border-slate-300 bg-white py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 flex items-center justify-center gap-2"
+              className="w-full rounded-[28px] border border-slate-300 bg-white py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 flex items-center justify-center gap-2"
             >
               <MapPin size={16} /> Ver perfil completo
             </button>

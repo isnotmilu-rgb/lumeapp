@@ -91,8 +91,8 @@ export default function App() {
 
   if (showSplash) {
     return (
-      <div className="h-screen w-screen bg-gradient-to-br from-[#0d3d11] to-[#1B5E20] flex items-center justify-center">
-        <div className="w-full h-full bg-[#F9FBE7] overflow-hidden">
+      <div className="min-h-screen w-full bg-gradient-to-br from-[#0d3d11] to-[#1B5E20] flex items-center justify-center">
+        <div className="w-full min-h-screen bg-[#F9FBE7]">
           <SplashScreen onFinish={() => setShowSplash(false)} />
         </div>
       </div>

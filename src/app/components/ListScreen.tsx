@@ -75,10 +75,10 @@ export function ListScreen() {
         <span className="font-bold">LumeApp</span>
       </div>
 
-      <div className="bg-[#2E7D32] text-white px-4 py-4">
-        <h1 className="font-bold">Lista de vendedores</h1>
+      <div className="bg-[#2E7D32] text-white px-4 py-4 shadow-[0_20px_60px_rgba(15,23,42,0.16)]">
+        <h1 className="font-bold text-xl">Lista de vendedores</h1>
 
-        <p className="text-[#A5D6A7] text-xs mt-1">
+        <p className="text-[#A5D6A7] text-xs mt-1 max-w-2xl">
           {vendors.filter(v => v.certified).length} certificados · {vendors.length} en total
         </p>
       </div>
@@ -117,12 +117,12 @@ export function ListScreen() {
         </div>
       </div>
 
-      <div className="px-3 py-3 space-y-3">
+      <div className="px-4 py-4 space-y-4 max-w-[1280px] mx-auto">
         {sorted.map(v => (
           <button
             key={v.id}
             onClick={() => navigate(`/seller/${v.id}`)}
-            className="w-full overflow-hidden rounded-[28px] border border-gray-100 bg-white shadow-sm transition hover:shadow-md text-left"
+            className="w-full overflow-hidden rounded-[32px] border border-gray-100 bg-white shadow-[0_25px_55px_rgba(15,23,42,0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_35px_80px_rgba(15,23,42,0.12)] text-left"
           >
             <div className="grid gap-4 md:grid-cols-[100px_1fr] p-4">
 
@@ -130,7 +130,7 @@ export function ListScreen() {
               <img
                 src={v.heroImage}
                 alt={`${v.name} preview`}
-                className="h-24 w-full rounded-3xl object-cover md:h-24 md:w-24"
+                className="h-24 w-full rounded-[28px] object-cover md:h-24 md:w-24 transition-all duration-500 ease-out"
               />
 
               <div className="flex flex-col justify-between">

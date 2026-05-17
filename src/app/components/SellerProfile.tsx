@@ -50,6 +50,15 @@ export function SellerProfile() {
       ? 'Entrega 24h'
       : 'Entrega 48h'
     : '';
+  const heroBadges = [
+    { icon: Package, label: 'Disponible hoy', show: deliveryStatus === 'Entrega hoy' },
+    { icon: Package, label: 'Entrega 24h', show: deliveryStatus === 'Entrega 24h' },
+    { icon: Tag, label: 'Stock bajo', show: selectedWoodOption?.available !== undefined && selectedWoodOption.available <= 3 },
+    { icon: Heart, label: 'Más vendido', show: vendor?.reviews !== undefined && vendor.reviews >= 25 },
+    { icon: Leaf, label: 'Leña premium', show: true },
+  ];
+  const ratingStars = Array.from({ length: 5 }, (_, index) => index < Math.round(vendor?.rating ?? 0));
+  const [loading, setLoading] = useState(true);
   const [woodImageLoaded, setWoodImageLoaded] = useState(false);
 
   const sendWhatsApp = () => {
@@ -70,6 +79,11 @@ export function SellerProfile() {
     }
   }, [selectedWoodOption, selectedMeters]);
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => setLoading(false), 180);
+    return () => window.clearTimeout(timer);
+  }, [vendor?.id]);
+
   if (!vendor) {
     return (
       <div className="min-h-screen bg-[#F5F7F4] px-4 py-10 sm:px-6 lg:px-8">
@@ -81,6 +95,33 @@ export function SellerProfile() {
           >
             Volver
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="bg-[#F5F7F4] text-slate-900">
+        <div className="mx-auto w-full max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8">
+          <div className="animate-pulse space-y-6">
+            <div className="h-[340px] rounded-[28px] bg-slate-200/60 shadow-lg" />
+            <div className="grid gap-6 lg:grid-cols-[1.6fr_0.9fr]">
+              <div className="space-y-4">
+                <div className="h-16 rounded-[24px] bg-slate-200/60" />
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="h-28 rounded-[24px] bg-slate-200/60" />
+                  <div className="h-28 rounded-[24px] bg-slate-200/60" />
+                  <div className="h-28 rounded-[24px] bg-slate-200/60" />
+                </div>
+                <div className="h-48 rounded-[28px] bg-slate-200/60" />
+              </div>
+              <div className="space-y-4">
+                <div className="h-80 rounded-[28px] bg-slate-200/60" />
+                <div className="h-48 rounded-[24px] bg-slate-200/60" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -124,9 +165,9 @@ export function SellerProfile() {
       </div>
 
       <div className="mx-auto w-full max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8">
-        <section className="relative overflow-hidden rounded-[28px] bg-slate-950 p-6 sm:p-8 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
-          <img src={vendor.heroImage} alt={`${vendor.name} hero`} className="absolute inset-0 h-full w-full object-cover opacity-80" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#081004]/90 via-[#0f3d12]/80 to-[#1B5E20]/80" />
+        <section className="relative overflow-visible rounded-[32px] bg-slate-950 p-6 sm:p-8 shadow-[0_35px_80px_rgba(15,23,42,0.22)]">
+          <img src={vendor.heroImage} alt={`${vendor.name} hero`} className="absolute inset-0 h-full w-full object-cover opacity-80 transition-all duration-700 ease-out" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#081004]/95 via-[#0f3d12]/88 to-[#1B5E20]/82" />
           <div className="relative grid gap-6 lg:grid-cols-[1.45fr_1fr] lg:items-center">
             <div className="space-y-5">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-[#D9F3C2] shadow-sm">
@@ -134,15 +175,24 @@ export function SellerProfile() {
                 Proveedor verificado
               </div>
 
-              <div className="max-w-3xl">
+              <div className="max-w-3xl rounded-[24px] border border-white/10 bg-slate-950/35 p-6 backdrop-blur-xl shadow-[0_40px_80px_rgba(15,23,42,0.18)]">
                 <h1 className="text-4xl font-semibold text-white sm:text-5xl">{vendor.name}</h1>
-                <p className="mt-4 text-base leading-8 text-white/85 sm:text-lg">
+                <p className="mt-4 text-base leading-8 text-slate-200/95 sm:text-lg">
                   Leña seca certificada, entrega rápida y medición confiable. Navega el stock, revisa el historial y coordina la compra en un solo lugar.
                 </p>
+                <div className="mt-5 flex flex-wrap items-center gap-3 text-sm text-slate-200">
+                  <div className="inline-flex items-center gap-1 text-amber-300">
+                    {ratingStars.map((filled, index) => (
+                      <Star key={index} size={16} className={filled ? 'text-amber-300' : 'text-white/40'} />
+                    ))}
+                  </div>
+                  <span className="font-semibold text-white">{vendor.rating.toFixed(1)}</span>
+                  <span className="text-slate-300">· {vendor.reviews} reseñas</span>
+                </div>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3">
-                <div className="rounded-3xl bg-white/10 px-4 py-4 text-sm text-white">
+                <div className="rounded-[28px] bg-white/10 px-4 py-4 text-sm text-white">
                   <p className="text-xs uppercase tracking-[0.2em] text-white/70">Precio</p>
                   <p className="mt-2 text-xl font-semibold">${selectedWoodOption?.price.toLocaleString('es-CL')} / m³</p>
                 </div>
@@ -156,25 +206,31 @@ export function SellerProfile() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-3">
-                <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/80">{deliveryStatus}</span>
-                <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/80">Medición NCh 2965</span>
-                <span className="rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/80">Leña premium</span>
+              <div className="mt-6 flex flex-wrap gap-3">
+                {heroBadges.filter((badge) => badge.show).map((badge, index) => {
+                  const BadgeIcon = badge.icon;
+                  return (
+                    <span key={index} className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/85 shadow-[0_10px_30px_rgba(15,23,42,0.12)] backdrop-blur-sm transition duration-300">
+                      <BadgeIcon size={14} className="text-emerald-200" />
+                      {badge.label}
+                    </span>
+                  );
+                })}
               </div>
             </div>
 
-            <div className="rounded-[28px] border border-white/10 bg-white/5 p-6 shadow-2xl">
+            <div className="rounded-[32px] border border-white/10 bg-white/10 p-6 shadow-[0_35px_70px_rgba(15,23,42,0.17)] backdrop-blur-xl">
               <p className="text-sm font-semibold uppercase tracking-[0.2em] text-white/75">Perfil premium</p>
               <div className="mt-5 grid gap-4">
-                <div className="rounded-3xl bg-white/10 p-4 text-white">
+                <div className="rounded-[28px] bg-white/10 p-4 text-white ring-1 ring-white/10">
                   <p className="text-xs uppercase tracking-[0.2em] text-white/70">Especie principal</p>
                   <p className="mt-3 text-xl font-semibold">{vendor.species}</p>
                 </div>
-                <div className="rounded-3xl bg-white/10 p-4 text-white">
+                <div className="rounded-3xl bg-white/10 p-4 text-white ring-1 ring-white/10">
                   <p className="text-xs uppercase tracking-[0.2em] text-white/70">Ubicación</p>
                   <p className="mt-3 text-xl font-semibold">{vendor.address}</p>
                 </div>
-                <div className="rounded-3xl bg-white/10 p-4 text-white">
+                <div className="rounded-3xl bg-white/10 p-4 text-white ring-1 ring-white/10">
                   <p className="text-xs uppercase tracking-[0.2em] text-white/70">Distancia</p>
                   <p className="mt-3 text-xl font-semibold">{vendor.distance.toFixed(1)} km</p>
                 </div>
@@ -183,9 +239,9 @@ export function SellerProfile() {
           </div>
         </section>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1.6fr_0.9fr] lg:items-start">
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1.55fr_0.95fr] lg:items-start">
           <main className="space-y-8">
-            <section className="rounded-[28px] bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.06)]">
+            <section className="rounded-[32px] bg-white p-6 shadow-[0_25px_60px_rgba(15,23,42,0.10)] transition-all duration-300">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-500">Perfil del proveedor</p>
@@ -195,7 +251,7 @@ export function SellerProfile() {
               </div>
 
               <div className="mt-6 grid gap-4 sm:grid-cols-3">
-                <div className="rounded-3xl border border-slate-100 bg-[#F9FBE7] p-5">
+                <div className="rounded-[28px] border border-slate-100 bg-[#F9FBE7] p-5">
                   <p className="text-xs uppercase tracking-[0.2em] text-slate-500">Calificación</p>
                   <p className="mt-3 text-3xl font-semibold text-[#1B5E20]">{vendor.rating}</p>
                 </div>
@@ -210,12 +266,12 @@ export function SellerProfile() {
               </div>
 
               <div className="mt-8 space-y-6">
-                <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-6">
+                <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-6">
                   <h3 className="text-lg font-semibold text-slate-900">Descripción rápida</h3>
                   <p className="mt-3 text-sm leading-7 text-slate-600">Este proveedor ofrece leña <strong>seca</strong> y <strong>certificada</strong> con entrega rápida y medición transparente. Ideal para hogares que buscan comodidad y rendimiento térmico.</p>
                 </div>
 
-                <div className="rounded-[24px] bg-white p-6 shadow-sm">
+                <div className="rounded-[28px] bg-white p-6 shadow-sm">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <h3 className="text-lg font-semibold text-slate-900">Características</h3>
@@ -227,7 +283,7 @@ export function SellerProfile() {
                     {featureItems.map((feature, index) => {
                       const Icon = feature.icon;
                       return (
-                        <div key={index} className="flex items-center gap-3 rounded-3xl border border-slate-200 bg-slate-50 p-4">
+                        <div key={index} className="flex items-center gap-3 rounded-[28px] border border-slate-200 bg-slate-50 p-4">
                           <Icon size={18} className="text-[#2E7D32]" />
                           <span className="text-sm font-medium text-slate-700">{feature.label}</span>
                         </div>
@@ -238,7 +294,7 @@ export function SellerProfile() {
               </div>
             </section>
 
-            <section className="rounded-[28px] bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.06)]">
+            <section className="rounded-[32px] bg-white p-6 shadow-[0_25px_60px_rgba(15,23,42,0.10)] transition-all duration-300">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <h2 className="text-2xl font-semibold text-slate-900">Mediciones recientes</h2>
@@ -256,7 +312,7 @@ export function SellerProfile() {
                 {measurements.map((measurement, index) => {
                   const isOptimal = measurement.status === 'Óptimo';
                   return (
-                    <div key={index} className="rounded-[24px] border border-slate-200 bg-[#FAFFFA] p-5">
+                    <div key={index} className="rounded-[28px] border border-slate-200 bg-[#FAFFFA] p-5 shadow-sm">
                       <div className={`h-2.5 w-2.5 rounded-full ${isOptimal ? 'bg-[#10B981]' : 'bg-[#F59E0B]'}`} />
                       <p className={`mt-4 text-3xl font-semibold ${isOptimal ? 'text-[#047857]' : 'text-[#B45309]'}`}>{measurement.humidity}%</p>
                       <p className="mt-3 text-sm text-slate-500">{measurement.date}</p>
@@ -272,23 +328,31 @@ export function SellerProfile() {
           </main>
 
           <aside className="space-y-6">
-            <div className="rounded-[28px] bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.08)]">
-              <p className="text-base font-semibold text-slate-900">Comprar</p>
+            <div className="rounded-[32px] bg-white p-6 shadow-[0_25px_60px_rgba(15,23,42,0.10)] transition-all duration-300">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-base font-semibold text-slate-900">Comprar</p>
+                  <p className="mt-1 text-sm text-slate-500">Elige tu género de leña y coordina el envío premium.</p>
+                </div>
+                <div className="rounded-[28px] bg-emerald-50 px-4 py-2 text-sm font-semibold text-[#166534] shadow-sm">
+                  {stockStatus}
+                </div>
+              </div>
 
-              <div className="mt-4 text-sm text-slate-700">
+              <div className="mt-6 text-sm text-slate-700">
                 <label className="block text-xs text-slate-500 mb-2">Tipo de madera</label>
-                <div className="flex gap-2 mb-4">
+                <div className="flex flex-wrap gap-2 mb-4">
                   {woodTypes.map((w) => (
                     <button
                       key={w}
                       onClick={() => setSelectedWood(w)}
-                      className={`px-3 py-2 rounded-lg border ${selectedWood === w ? 'bg-[#E8F5E9] border-[#2E7D32] text-[#1B5E20]' : 'bg-white border-gray-200 text-slate-700'}`}>
+                      className={`px-3 py-2 rounded-2xl border transition-all duration-300 ${selectedWood === w ? 'bg-[#E8F5E9] border-[#2E7D32] text-[#1B5E20] shadow-[0_14px_30px_rgba(34,197,94,0.12)]' : 'bg-white border-slate-200 text-slate-700 hover:-translate-y-0.5 hover:scale-[1.02] hover:border-[#D1FAE5] hover:shadow-[0_14px_30px_rgba(34,197,94,0.08)]'}`}>
                       {w}
                     </button>
                   ))}
                 </div>
 
-                <div className="overflow-hidden rounded-2xl bg-slate-50 shadow-xl transition duration-500 ease-out">
+                <div className="overflow-hidden rounded-[32px] bg-slate-100 shadow-[0_25px_60px_rgba(15,23,42,0.12)] transition-all duration-500 ease-out">
                   <img
                     key={selectedWood}
                     src={selectedWoodOption?.imageUrl}
@@ -298,41 +362,52 @@ export function SellerProfile() {
                   />
                 </div>
 
-                <label className="block text-xs text-slate-500 mb-2 mt-4">Cantidad (m³)</label>
-                <div className="flex items-center gap-3 mb-4">
-                  <button
-                    onClick={() => setSelectedMeters(m => Math.max(1, m - 1))}
-                    className="h-10 w-10 rounded-full border flex items-center justify-center text-lg"
-                    aria-label="Disminuir cantidad"
-                  >−</button>
-                  <div className="min-w-[70px] text-center text-2xl font-semibold">{selectedMeters}</div>
-                  <button
-                    onClick={() => setSelectedMeters(m => Math.min(selectedWoodOption?.available ?? m, m + 1))}
-                    className="h-10 w-10 rounded-full bg-[#2E7D32] text-white flex items-center justify-center text-lg"
-                    aria-label="Aumentar cantidad"
-                  >+</button>
+                <div className="mt-5 rounded-[32px] border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-slate-500">
+                    <span>Precio unitario</span>
+                    <span>${selectedWoodOption?.price.toLocaleString('es-CL')} / m³</span>
+                  </div>
                 </div>
 
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-xs text-slate-500">Precio unitario</div>
-                  <div className="font-semibold">${selectedWoodOption?.price.toLocaleString('es-CL')} / m³</div>
+                <div className="mt-4 rounded-[32px] border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-sm text-slate-500">Total estimado</p>
+                      <p className="mt-2 text-3xl font-semibold text-[#1B5E20]">${totalPrice.toLocaleString('es-CL')}</p>
+                    </div>
+                    <div className="rounded-[28px] bg-emerald-50 px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[#166534]">
+                      {deliveryStatus}
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex items-center justify-between pb-3 border-b border-gray-100 mb-4">
-                  <div className="text-sm text-slate-600">Total estimado</div>
-                  <div className="text-xl font-semibold text-[#1B5E20]">${totalPrice.toLocaleString('es-CL')}</div>
+                <div className="mt-5 rounded-[32px] bg-slate-50 p-4">
+                  <label className="block text-xs text-slate-500 mb-2">Cantidad (m³)</label>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setSelectedMeters(m => Math.max(1, m - 1))}
+                      className="h-10 w-10 rounded-full border border-slate-200 bg-white text-lg font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-[#D1FAE5] hover:shadow-[0_15px_30px_rgba(34,197,94,0.08)]"
+                      aria-label="Disminuir cantidad"
+                    >−</button>
+                    <div className="min-w-[70px] text-center text-2xl font-semibold text-slate-900">{selectedMeters}</div>
+                    <button
+                      onClick={() => setSelectedMeters(m => Math.min(selectedWoodOption?.available ?? m, m + 1))}
+                      className="h-10 w-10 rounded-full bg-[#2E7D32] text-white flex items-center justify-center text-lg font-semibold transition hover:-translate-y-0.5 hover:shadow-[0_15px_30px_rgba(34,197,94,0.24)]"
+                      aria-label="Aumentar cantidad"
+                    >+</button>
+                  </div>
                 </div>
 
                 <button
                   onClick={sendWhatsApp}
-                  className="w-full mt-2 inline-flex items-center justify-center gap-3 rounded-[14px] bg-gradient-to-r from-[#1B5E20] to-[#2E7D32] px-4 py-3 text-sm font-semibold text-white shadow transition hover:from-[#25672b]"
+                  className="w-full mt-4 inline-flex items-center justify-center gap-3 rounded-[18px] bg-gradient-to-r from-[#1B5E20] to-[#2E7D32] px-4 py-3 text-sm font-semibold text-white shadow-xl shadow-[#0f3d12]/10 transition-all duration-300 hover:scale-[1.01] hover:shadow-[#1f5133]/15"
                 >
                   <MessageCircle size={18} /> Contactar por WhatsApp
                 </button>
               </div>
             </div>
 
-            <div className="rounded-[20px] bg-white p-4 shadow-sm">
+            <div className="rounded-[28px] bg-white p-4 shadow-sm transition-all duration-300">
               <p className="text-sm font-semibold text-slate-900">Detalles rápidos</p>
               <div className="mt-3 space-y-2 text-sm text-slate-600">
                 <div className="rounded-2xl bg-slate-50 p-3">Entrega estimada en 24-48h</div>

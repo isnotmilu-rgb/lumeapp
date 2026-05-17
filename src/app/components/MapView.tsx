@@ -197,7 +197,7 @@ export function MapView({
   }
 
   return (
-    <div className={`relative w-full h-full ${className}`} style={{ minHeight: '100%' }}>
+    <div className={`relative w-full h-full ${className}`} style={{ height: '100%', minHeight: '100%' }}>
       <MapContainer
         center={center}
         zoom={zoom}

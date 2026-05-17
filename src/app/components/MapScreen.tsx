@@ -123,9 +123,9 @@ export function MapScreen() {
   };
 
   return (
-    <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }} className="relative w-full bg-[#F0F7F0]">
+    <div className="min-h-screen flex flex-col relative w-full bg-[#F0F7F0]">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#1B5E20] to-[#2E7D32] text-white px-4 py-3 flex-shrink-0 shadow-lg">
+      <div className="bg-gradient-to-r from-[#1B5E20] to-[#2E7D32] text-white px-4 py-3 flex-shrink-0 shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
         <div className="flex items-center justify-between mb-1">
           <span className="text-xs opacity-90">9:41</span>
           <span className="font-bold text-sm">LumeApp</span>
@@ -173,7 +173,7 @@ export function MapScreen() {
       {/* Main Content - Scrollable */}
       <div className="flex-1 overflow-y-auto flex flex-col gap-4 p-4 pb-24">
         {/* Map Section - Fixed Height */}
-        <div className="relative w-full rounded-xl overflow-hidden shadow-md flex-shrink-0" style={{ height: '300px', minHeight: '300px' }}>
+        <div className="relative w-full rounded-[32px] overflow-hidden shadow-[0_30px_70px_rgba(15,23,42,0.12)] flex-shrink-0 h-[320px] min-h-[320px]">
           <MapView
             className="w-full h-full"
             center={[-38.7359, -72.5904]}
@@ -228,7 +228,7 @@ export function MapScreen() {
 
           {!mapReady && (
             <div className="absolute inset-0 flex items-center justify-center bg-white/90 z-[1100]">
-              <div className="flex flex-col items-center gap-2 rounded-3xl bg-white/95 border border-gray-200 px-5 py-4 shadow-lg">
+              <div className="flex flex-col items-center gap-2 rounded-[32px] bg-white/95 border border-gray-200 px-5 py-4 shadow-[0_28px_50px_rgba(15,23,42,0.12)]">
                 <div className="h-2.5 w-16 rounded-full bg-gray-200 animate-pulse"></div>
                 <div className="h-2.5 w-24 rounded-full bg-gray-200 animate-pulse"></div>
                 <div className="h-2.5 w-10 rounded-full bg-gray-200 animate-pulse"></div>
@@ -347,7 +347,7 @@ export function MapScreen() {
               {filtered.map((v) => (
                 <div
                   key={v.id}
-                  className="bg-white rounded-3xl p-4 shadow-sm border border-gray-100 hover:shadow-lg active:scale-[0.99] transition-all duration-200 cursor-pointer"
+                  className="bg-white rounded-[32px] p-4 shadow-[0_20px_55px_rgba(15,23,42,0.08)] border border-gray-100 hover:shadow-[0_30px_70px_rgba(15,23,42,0.12)] active:scale-[0.99] transition-all duration-200 cursor-pointer"
                   onClick={() => {
                     setSelectedVendor(v);
                     analyticsService.trackVendorInteraction(v.id.toString(), 'card_clicked', {
