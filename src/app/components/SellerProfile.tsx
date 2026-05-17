@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Phone, Share2, Heart, MessageCircle, MapPin, List, User } from 'lucide-react';
+import { ArrowLeft, Share2, Heart, MessageCircle, MapPin, List, User, CheckCircle, Droplet, DollarSign, Package } from 'lucide-react';
 import { useApp } from '../App';
 
 const vendors = [
@@ -13,16 +13,12 @@ const vendors = [
   { id: 7, name: 'Forestal Cautín', initials: 'FC', humidity: 23, certified: true, species: 'Roble', available: 18, price: 44000, address: 'Ruta 5 Norte km 8, Temuco', lastMeasured: '5 días', rating: 4.5, reviews: 18, daysAgo: 5 },
 ];
 
-function Stars({ rating, reviews }: { rating: number; reviews: number }) {
-  return (
-    <div className="flex items-center gap-1">
-      {[1,2,3,4,5].map(i => (
-        <span key={i} style={{ color: i <= Math.round(rating) ? '#F9A825' : '#D1D5DB', fontSize: 14 }}>★</span>
-      ))}
-      <span className="text-sm text-gray-500 ml-1">{rating} ({reviews} reseñas)</span>
-    </div>
-  );
-}
+const features = [
+  { icon: '✓', label: 'Medición certificada', color: 'bg-emerald-100 text-emerald-700' },
+  { icon: '🌡', label: 'Secado controlado', color: 'bg-blue-100 text-blue-700' },
+  { icon: '🌲', label: 'Leña seleccionada', color: 'bg-amber-100 text-amber-700' },
+  { icon: '✂', label: 'Corte a medida', color: 'bg-purple-100 text-purple-700' },
+];
 
 export function SellerProfile() {
   const navigate = useNavigate();
@@ -40,189 +36,219 @@ export function SellerProfile() {
 
   const totalPrice = vendor.price * selectedMeters;
   const measurements = [
-    { date: '10 May 2026', time: '08:32', humidity: vendor.humidity ?? 26, species: vendor.species, verified: vendor.certified },
-    { date: '07 May 2026', time: '09:15', humidity: vendor.certified ? (vendor.humidity ?? 0) + 2 : 28, species: vendor.species, verified: vendor.certified },
-    { date: '04 May 2026', time: '11:00', humidity: vendor.certified ? (vendor.humidity ?? 0) + 3 : 30, species: vendor.species, verified: vendor.certified },
+    { date: '10 May 2026', time: '08:32', humidity: vendor.humidity ?? 26, species: vendor.species, verified: vendor.certified, status: 'Óptimo' },
+    { date: '07 May 2026', time: '09:15', humidity: vendor.certified ? (vendor.humidity ?? 0) + 2 : 28, species: vendor.species, verified: vendor.certified, status: 'Aceptable' },
+    { date: '04 May 2026', time: '11:00', humidity: vendor.certified ? (vendor.humidity ?? 0) + 3 : 30, species: vendor.species, verified: vendor.certified, status: 'Aceptable' },
   ];
 
-  return (
-    <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }} className="bg-white">
-      {/* Status Bar */}
-      <div className="bg-[#1B5E20] text-white px-4 py-2 flex justify-between items-center text-xs flex-shrink-0">
-        <span>9:41</span><span className="font-bold">LumeApp</span>
-      </div>
+  const speciesOptions = ['Eucaliptus', 'Roble', 'Coigüe', 'Aromo', 'Raulí'];
 
-      {/* Header with Gradient */}
-      <div className="relative bg-gradient-to-b from-[#2E7D32] via-[#1B5E20] to-white px-4 pt-4 pb-20 flex-shrink-0">
-        <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-white/20 transition-colors mb-3">
-          <ArrowLeft size={22} className="text-white" />
-        </button>
-        
-        <div className="flex items-end justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-black text-white leading-tight">{vendor.name}</h1>
-            <div className="flex items-center gap-2 mt-2">
-              <MapPin size={16} className="text-[#A5D6A7]" />
-              <p className="text-[#A5D6A7] text-sm">{vendor.address}</p>
-            </div>
-          </div>
-          <button onClick={() => setShowComingSoon(true)} className="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors">
-            <Heart size={20} className="text-white" />
+  return (
+    <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }} className="bg-white max-w-[430px] mx-auto w-full">
+      {/* Hero Section - Premium Gradient Dark Green */}
+      <div 
+        className="relative flex-shrink-0 px-4 py-4 flex flex-col justify-between"
+        style={{
+          height: '320px',
+          background: 'linear-gradient(160deg, #0a2e0d 0%, #1B5E20 50%, #2E7D32 100%)',
+        }}
+      >
+        {/* Top Bar - Back, Share, Heart */}
+        <div className="flex items-center justify-between">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center transition-all active:scale-95"
+          >
+            <ArrowLeft size={20} className="text-gray-900" />
           </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setShowComingSoon(true)}
+              className="w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center transition-all active:scale-95"
+            >
+              <Share2 size={18} className="text-gray-900" />
+            </button>
+            <button 
+              onClick={() => setShowComingSoon(true)}
+              className="w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center transition-all active:scale-95"
+            >
+              <Heart size={18} className="text-gray-900" />
+            </button>
+          </div>
         </div>
 
-        {/* Badges */}
-        <div className="flex gap-2">
-          {vendor.certified ? (
-            <span className="inline-flex items-center gap-1.5 bg-white text-[#2E7D32] px-3 py-1.5 rounded-full font-bold text-xs">
-              <div className="w-2 h-2 bg-[#2E7D32] rounded-full"></div>
-              ✓ Certificado
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 bg-orange-100 text-orange-700 px-3 py-1.5 rounded-full font-bold text-xs">
-              ⚠ Sin certificación
+        {/* Content - Name, Address, Badge */}
+        <div className="flex flex-col gap-3">
+          {vendor.certified && (
+            <span className="inline-flex items-center gap-2 bg-emerald-400/90 text-white px-3.5 py-1.5 rounded-full font-bold text-xs w-fit">
+              <CheckCircle size={14} />
+              Proveedor verificado
             </span>
           )}
-          <span className="inline-flex items-center gap-1 bg-white/20 text-white px-3 py-1.5 rounded-full text-xs font-medium">
-            ⭐ {vendor.rating} ({vendor.reviews})
-          </span>
+          <div>
+            <h1 className="text-4xl font-black text-white leading-tight">{vendor.name}</h1>
+            <div className="flex items-center gap-2 mt-2">
+              <MapPin size={18} className="text-emerald-200 flex-shrink-0" />
+              <p className="text-emerald-100 text-sm">{vendor.address}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Rating Badge - Bottom Right Floating */}
+        <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
+          <div className="flex items-center gap-1.5">
+            <span className="text-lg">⭐</span>
+            <div>
+              <span className="font-bold text-gray-900">{vendor.rating}</span>
+              <span className="text-xs text-gray-600 ml-1">({vendor.reviews})</span>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto px-4 pb-32" style={{ WebkitOverflowScrolling: 'touch' }}>
-        
-        {/* Warnings */}
-        {!vendor.certified && (
-          <div className="mt-4 bg-orange-50 border-l-4 border-orange-400 p-4 rounded-lg">
-            <p className="font-bold text-orange-700 text-sm mb-1">⚠️ Sin certificación activa</p>
-            <p className="text-xs text-orange-600">No podemos garantizar la calidad. Contáctalo bajo tu propio riesgo.</p>
-          </div>
-        )}
-
-        {vendor.certified && vendor.daysAgo !== null && vendor.daysAgo >= 5 && (
-          <div className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
-            <p className="font-bold text-yellow-700 text-sm mb-1">⏰ Certificación por vencer</p>
-            <p className="text-xs text-yellow-600">Medido hace {vendor.daysAgo} días — la certificación expira a los 7.</p>
-          </div>
-        )}
-
-        {/* Metrics Cards */}
-        <div className="mt-6 grid grid-cols-2 gap-4">
-          {/* Humedad Card */}
-          <div className="bg-gradient-to-br from-green-50 to-green-100/50 border border-green-200 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow">
-            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Humedad</p>
-            {vendor.humidity !== null && vendor.certified ? (
-              <>
-                <p className="text-3xl font-black text-green-700">{vendor.humidity}%</p>
-                <p className="text-xs text-green-600 mt-2 font-medium">✓ Norma NCh 2965 (&lt;25%)</p>
-              </>
-            ) : (
-              <p className="text-2xl font-bold text-gray-400">—</p>
-            )}
-          </div>
-
-          {/* Precio Card */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow">
-            <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Precio/m³</p>
-            <p className="text-3xl font-black text-blue-700">${(vendor.price / 1000).toFixed(0)}k</p>
-            <p className="text-xs text-gray-500 mt-2">Disponible: {vendor.available}m³</p>
-          </div>
+      <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+        {/* Features Strip */}
+        <div className="px-4 py-4 space-y-2">
+          {features.map((f, i) => (
+            <div key={i} className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl ${f.color}`}>
+              <span className="text-lg font-bold">{f.icon}</span>
+              <span className="font-semibold text-sm">{f.label}</span>
+            </div>
+          ))}
         </div>
 
-        {/* Species + Details */}
-        <div className="mt-6 bg-white border border-gray-200 rounded-3xl p-5 shadow-sm">
-          <h3 className="font-bold text-gray-900 mb-4">Detalles</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Tipo de leña</span>
-              <span className="font-bold text-gray-900">{vendor.species}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Medido</span>
-              <span className="font-bold text-gray-900">{vendor.lastMeasured || 'Nunca'}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Estado</span>
-              {vendor.certified ? (
-                <span className="inline-flex items-center gap-1 bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-xs font-bold">
-                  ✓ Verificado
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs font-bold">
-                  Sin medir
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Meters Selector */}
-        <div className="mt-6 bg-gradient-to-br from-[#F9FBE7] to-white border border-gray-200 rounded-3xl p-5 shadow-sm">
-          <div className="flex justify-between items-center mb-4">
-            <label className="font-bold text-gray-900">¿Cuántos metros?</label>
-            <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-2xl px-2 py-1">
-              <button 
-                onClick={() => setSelectedMeters(m => Math.max(1, m - 1))} 
-                className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-[#2E7D32] hover:text-white text-gray-700 font-bold flex items-center justify-center transition-colors text-sm"
-              >
-                −
-              </button>
-              <span className="font-black text-[#2E7D32] w-6 text-center text-lg">{selectedMeters}</span>
-              <button 
-                onClick={() => setSelectedMeters(m => Math.min(vendor.available, m + 1))} 
-                className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-[#2E7D32] hover:text-white text-gray-700 font-bold flex items-center justify-center transition-colors text-sm"
-              >
-                +
-              </button>
-            </div>
-          </div>
-          <div className="bg-white border border-gray-200 rounded-2xl p-4">
-            <div className="flex justify-between items-end">
+        {/* Metrics Grid - 3 Cards */}
+        <div className="px-4 py-2 space-y-2">
+          {/* Humedad */}
+          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 border border-emerald-200 rounded-3xl p-4 shadow-sm">
+            <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs text-gray-500 mb-1">Total estimado</p>
-                <p className="text-2xl font-black text-[#2E7D32]">${totalPrice.toLocaleString('es-CL')}</p>
+                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Humedad</p>
+                {vendor.humidity !== null && vendor.certified ? (
+                  <>
+                    <p className="text-3xl font-black text-emerald-700 mt-1">{vendor.humidity}%</p>
+                    <p className="text-xs text-emerald-600 mt-2">Seca y certificada</p>
+                  </>
+                ) : (
+                  <p className="text-2xl font-bold text-gray-400 mt-1">—</p>
+                )}
               </div>
-              <p className="text-sm text-gray-500">{selectedMeters} × ${vendor.price.toLocaleString('es-CL')}</p>
+              <Droplet size={32} className="text-emerald-400" />
+            </div>
+          </div>
+
+          {/* Precio */}
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200 rounded-3xl p-4 shadow-sm">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Precio/m³</p>
+                <p className="text-3xl font-black text-blue-700 mt-1">${(vendor.price / 1000).toFixed(0)}k</p>
+              </div>
+              <DollarSign size={32} className="text-blue-400" />
+            </div>
+          </div>
+
+          {/* Disponibilidad */}
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100/50 border border-purple-200 rounded-3xl p-4 shadow-sm">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Disponible</p>
+                <p className="text-3xl font-black text-purple-700 mt-1">{vendor.available}m³</p>
+              </div>
+              <Package size={32} className="text-purple-400" />
             </div>
           </div>
         </div>
 
-        {/* Measurements */}
+        {/* Specs & Calculator - Two Columns */}
+        <div className="px-4 py-4 grid grid-cols-2 gap-3">
+          {/* Species */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-4">
+            <p className="text-xs font-semibold text-gray-600 uppercase mb-2">Tipo de leña</p>
+            <p className="font-bold text-lg text-gray-900">{vendor.species}</p>
+          </div>
+
+          {/* Last Measured */}
+          <div className="bg-white border border-gray-200 rounded-2xl p-4">
+            <p className="text-xs font-semibold text-gray-600 uppercase mb-2">Última medición</p>
+            <p className="font-bold text-gray-900">{vendor.lastMeasured || 'Nunca'}</p>
+          </div>
+        </div>
+
+        {/* Meters Calculator */}
+        <div className="px-4 py-3">
+          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100/50 border border-yellow-200 rounded-3xl p-5">
+            <div className="mb-4">
+              <p className="text-sm font-bold text-gray-900 mb-3">¿Cuántos metros?</p>
+              <div className="flex items-center justify-center gap-4">
+                <button 
+                  onClick={() => setSelectedMeters(m => Math.max(1, m - 1))} 
+                  className="w-12 h-12 rounded-full bg-white border-2 border-yellow-300 font-bold text-xl text-gray-700 hover:bg-yellow-50 transition-all active:scale-95"
+                >
+                  −
+                </button>
+                <span className="font-black text-5xl text-yellow-700 w-16 text-center">{selectedMeters}</span>
+                <button 
+                  onClick={() => setSelectedMeters(m => Math.min(vendor.available, m + 1))} 
+                  className="w-12 h-12 rounded-full bg-yellow-400 font-bold text-xl text-white hover:bg-yellow-500 transition-all active:scale-95"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl p-4 text-center">
+              <p className="text-xs text-gray-600 mb-1">Total estimado</p>
+              <p className="text-3xl font-black text-yellow-700">${totalPrice.toLocaleString('es-CL')}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Measurements with Status Badges */}
         {vendor.certified && (
-          <div className="mt-6 mb-4">
-            <h3 className="font-bold text-gray-900 mb-4">Últimas mediciones</h3>
+          <div className="px-4 py-4">
+            <h3 className="font-bold text-gray-900 mb-3 text-lg">Últimas mediciones</h3>
             <div className="space-y-2">
               {measurements.map((m, i) => (
-                <div key={i} className="bg-white border border-gray-200 rounded-2xl p-4 flex justify-between items-center hover:border-green-300 transition-colors">
-                  <div>
-                    <p className="font-bold text-gray-900 text-sm">{m.date}</p>
-                    <p className="text-xs text-gray-400">{m.time}</p>
+                <div key={i} className="bg-white border border-gray-200 rounded-2xl p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <p className="font-bold text-gray-900">{m.date}</p>
+                      <p className="text-xs text-gray-500">{m.time}</p>
+                    </div>
+                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${m.status === 'Óptimo' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                      {m.status}
+                    </span>
                   </div>
-                  <div className="text-right">
-                    <p className="font-black text-green-700 text-lg">{m.humidity}%</p>
-                    <p className="text-xs text-green-600 font-medium">✓ {m.species}</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-2xl font-black text-emerald-700">{m.humidity}%</p>
+                    <p className="text-xs text-gray-600">{m.species}</p>
                   </div>
                 </div>
               ))}
             </div>
-            <p className="text-xs text-gray-400 text-center mt-3">Datos de dispositivo — no editables</p>
           </div>
         )}
 
-        {/* Additional Actions */}
-        <div className="mt-6 bg-white border border-gray-200 rounded-3xl p-4 shadow-sm">
-          <button 
-            onClick={() => navigate(`/history/${id}`)} 
-            className="w-full text-left px-4 py-3 rounded-xl hover:bg-gray-50 transition-colors font-medium text-gray-700 flex justify-between items-center"
-          >
-            <span>Ver historial completo</span>
-            <span className="text-gray-400">→</span>
-          </button>
+        {/* Reviews Section */}
+        <div className="px-4 py-4">
+          <h3 className="font-bold text-gray-900 mb-3 text-lg">Reseñas</h3>
+          <div className="bg-white border border-gray-200 rounded-2xl p-4 text-center">
+            <p className="text-4xl font-black text-gray-800 mb-1">{vendor.rating}</p>
+            <div className="flex items-center justify-center gap-1 mb-2">
+              {[1,2,3,4,5].map(i => (
+                <span key={i} style={{ color: i <= Math.round(vendor.rating) ? '#F9A825' : '#D1D5DB', fontSize: 18 }}>★</span>
+              ))}
+            </div>
+            <p className="text-sm text-gray-600">{vendor.reviews} evaluaciones</p>
+          </div>
         </div>
+
+        <div className="h-8"></div>
       </div>
 
-      <div className="flex-shrink-0 bg-white px-4 pb-4 pt-3 safe-area-bottom">
+      {/* Fixed Bottom WhatsApp */}
+      <div className="flex-shrink-0 bg-white px-4 py-3 border-t border-gray-200">
         <button
           onClick={() => {
             setCurrentStep(4);
