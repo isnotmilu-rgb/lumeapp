@@ -42,7 +42,7 @@ export function VendorDashboard() {
   const priceDiff = MY_PRICE - ZONE_AVG;
 
   return (
-    <div className="h-[820px] flex flex-col bg-[#F9FBE7] overflow-hidden">
+    <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }} className="bg-[#F9FBE7]">
       <div className="bg-[#1B5E20] text-white px-4 py-2 flex justify-between items-center text-xs flex-shrink-0">
         <span>9:41</span><span className="font-bold">LumeApp</span>
       </div>
@@ -240,7 +240,6 @@ export function VendorDashboard() {
       <div className="bg-white border-t border-gray-200 px-4 py-3 flex justify-around items-center flex-shrink-0">
         <button className="flex flex-col items-center gap-1 text-[#2E7D32]"><Home size={22}/><span className="text-xs">Inicio</span></button>
         <button onClick={() => navigate('/stats')} className="flex flex-col items-center gap-1 text-gray-400"><BarChart3 size={22}/><span className="text-xs">Stats</span></button>
-        <button onClick={() => navigate('/certification')} className="flex flex-col items-center gap-1 text-gray-400"><Shield size={22}/><span className="text-xs">Certif.</span></button>
         <button onClick={() => navigate('/profile/vendor')} className="flex flex-col items-center gap-1 text-gray-400"><User size={22}/><span className="text-xs">Perfil</span></button>
       </div>
     </div>

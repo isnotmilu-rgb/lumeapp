@@ -132,7 +132,7 @@ export function MapScreen() {
   };
 
   return (
-    <div className="relative h-screen w-full flex flex-col bg-[#F0F7F0] overflow-hidden">
+    <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }} className="relative w-full bg-[#F0F7F0]">
       {/* Header */}
       <div className="bg-gradient-to-r from-[#1B5E20] to-[#2E7D32] text-white px-4 py-3 flex-shrink-0 shadow-lg">
         <div className="flex items-center justify-between mb-1">

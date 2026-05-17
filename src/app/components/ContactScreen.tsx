@@ -19,9 +19,9 @@ export function ContactScreen() {
   const vendor = vendors.find(v => v.id === Number(id));
 
   if (!vendor) return (
-    <div className="h-[820px] flex flex-col items-center justify-center bg-[#F9FBE7]">
-      <p className="text-gray-500 text-sm mb-4">Vendedor no encontrado</p>
-      <button onClick={() => navigate('/map')} className="bg-[#2E7D32] text-white px-6 py-2 rounded-xl text-sm">Volver al mapa</button>
+    <div style={{height:'100dvh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
+      <p>Vendedor no encontrado</p>
+      <button onClick={() => navigate(-1)}>Volver</button>
     </div>
   );
 
@@ -29,7 +29,7 @@ export function ContactScreen() {
   const total = vendor.price * meters;
 
   return (
-    <div className="h-[820px] flex flex-col bg-[#F9FBE7] overflow-hidden">
+    <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }} className="bg-[#F9FBE7]">
       <div className="bg-[#1B5E20] text-white px-4 py-2 flex justify-between items-center text-xs flex-shrink-0">
         <span>9:41</span><span className="font-bold">LumeApp</span>
       </div>
