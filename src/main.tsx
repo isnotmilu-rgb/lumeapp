@@ -4,6 +4,7 @@ inject();
 import { createRoot } from "react-dom/client";
 import React from "react";
 import App from "./app/App.tsx";
+import "./styles/index.css";
 
 // Error Boundary for catching React errors
 class ErrorBoundary extends React.Component<
