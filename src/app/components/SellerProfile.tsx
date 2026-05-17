@@ -44,69 +44,73 @@ export function SellerProfile() {
   const speciesOptions = ['Eucaliptus', 'Roble', 'Coigüe', 'Aromo', 'Raulí'];
 
   return (
-    <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }} className="bg-white max-w-[430px] mx-auto w-full">
-      {/* Hero Section - Premium Gradient Dark Green */}
-      <div 
-        className="relative flex-shrink-0 px-4 py-4 flex flex-col justify-between"
-        style={{
-          height: '320px',
-          background: 'linear-gradient(160deg, #0a2e0d 0%, #1B5E20 50%, #2E7D32 100%)',
-        }}
-      >
-        {/* Top Bar - Back, Share, Heart */}
-        <div className="flex items-center justify-between">
-          <button 
-            onClick={() => navigate(-1)} 
-            className="w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center transition-all active:scale-95"
+    <div className="min-h-screen bg-gray-100 flex justify-center">
+      <div className="w-full bg-white relative" style={{ maxWidth: '430px' }}>
+        <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          {/* Hero Section - Premium Gradient Dark Green */}
+          <div 
+            className="relative flex-shrink-0 px-4 pt-4 pb-6 flex flex-col rounded-b-3xl"
+            style={{
+              height: '320px',
+              background: 'linear-gradient(160deg, #0a2e0d 0%, #1B5E20 50%, #2E7D32 100%)',
+            }}
           >
-            <ArrowLeft size={20} className="text-gray-900" />
-          </button>
-          <div className="flex gap-2">
-            <button 
-              onClick={() => setShowComingSoon(true)}
-              className="w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center transition-all active:scale-95"
-            >
-              <Share2 size={18} className="text-gray-900" />
-            </button>
-            <button 
-              onClick={() => setShowComingSoon(true)}
-              className="w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center transition-all active:scale-95"
-            >
-              <Heart size={18} className="text-gray-900" />
-            </button>
-          </div>
-        </div>
+            {/* Top Bar - Back, Share, Heart */}
+            <div className="flex items-center justify-between">
+              <button 
+                onClick={() => navigate(-1)} 
+                className="w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center transition-all active:scale-95"
+              >
+                <ArrowLeft size={20} className="text-gray-900" />
+              </button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setShowComingSoon(true)}
+                  className="w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center transition-all active:scale-95"
+                >
+                  <Share2 size={18} className="text-gray-900" />
+                </button>
+                <button 
+                  onClick={() => setShowComingSoon(true)}
+                  className="w-10 h-10 rounded-full bg-white/90 hover:bg-white shadow-md flex items-center justify-center transition-all active:scale-95"
+                >
+                  <Heart size={18} className="text-gray-900" />
+                </button>
+              </div>
+            </div>
 
-        {/* Content - Name, Address, Badge */}
-        <div className="flex flex-col gap-3">
-          {vendor.certified && (
-            <span className="inline-flex items-center gap-2 bg-emerald-400/90 text-white px-3.5 py-1.5 rounded-full font-bold text-xs w-fit">
-              <CheckCircle size={14} />
-              Proveedor verificado
-            </span>
-          )}
-          <div>
-            <h1 className="text-4xl font-black text-white leading-tight">{vendor.name}</h1>
-            <div className="flex items-center gap-2 mt-2">
-              <MapPin size={18} className="text-emerald-200 flex-shrink-0" />
-              <p className="text-emerald-100 text-sm">{vendor.address}</p>
+            <div className="flex-1" />
+
+            <div className="space-y-3">
+              {vendor.certified && (
+                <span className="inline-flex items-center gap-2 bg-emerald-400/90 text-white px-3.5 py-1.5 rounded-full font-bold text-xs w-fit">
+                  <CheckCircle size={14} />
+                  Proveedor verificado
+                </span>
+              )}
+              <div className="space-y-2">
+                <h1 className="text-4xl font-black text-white leading-tight">{vendor.name}</h1>
+                <div className="flex items-center gap-2">
+                  <MapPin size={18} className="text-white flex-shrink-0" />
+                  <p className="text-white text-sm">{vendor.address}</p>
+                </div>
+                <p className="text-sm text-emerald-200">En línea · Responde rápido</p>
+              </div>
+            </div>
+
+            {/* Rating Badge - Bottom Right Floating */}
+            <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
+              <div className="flex items-center gap-1.5">
+                <span className="text-lg">⭐</span>
+                <div>
+                  <span className="font-bold text-gray-900">{vendor.rating}</span>
+                  <span className="text-xs text-gray-600 ml-1">({vendor.reviews})</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Rating Badge - Bottom Right Floating */}
-        <div className="absolute bottom-4 right-4 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
-          <div className="flex items-center gap-1.5">
-            <span className="text-lg">⭐</span>
-            <div>
-              <span className="font-bold text-gray-900">{vendor.rating}</span>
-              <span className="text-xs text-gray-600 ml-1">({vendor.reviews})</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Scrollable Content */}
+          {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
         {/* Features Strip */}
         <div className="px-4 py-4 space-y-2">
@@ -270,6 +274,8 @@ export function SellerProfile() {
         <button onClick={() => navigate('/profile/buyer')} className="flex flex-col items-center gap-1 text-gray-400"><User size={22} /><span className="text-xs">Perfil</span></button>
       </div>
     </div>
+  </div>
+</div>
   );
 }
 
