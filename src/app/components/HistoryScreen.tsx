@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, Info } from 'lucide-react';
+import { vendors } from '../data/vendors';
 
 const vendorHistory = {
   1: {
@@ -64,17 +65,19 @@ const vendorHistory = {
 export function HistoryScreen() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const history = vendorHistory[Number(id) as keyof typeof vendorHistory];
+  const idNum = Number(id);
+  const vendor = vendors.find(v => v.id === idNum);
+  const history = vendorHistory[idNum as keyof typeof vendorHistory];
 
-  if (!history) return (
-    <div style={{height:'100dvh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center'}}>
+  if (!vendor) return (
+    <div className="min-h-screen flex flex-col items-center justify-center">
       <p>Vendedor no encontrado</p>
-      <button onClick={() => navigate(-1)}>Volver</button>
+      <button onClick={() => navigate(-1)} className="mt-3 px-3 py-2 bg-[#1B5E20] text-white rounded-lg">Volver</button>
     </div>
   );
 
   return (
-    <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }} className="bg-[#F9FBE7]">
+    <div className="min-h-screen flex flex-col bg-[#F9FBE7]">
       {/* Status Bar */}
       <div className="bg-[#1B5E20] text-white px-4 py-2 flex justify-between items-center text-xs flex-shrink-0">
         <span>9:41</span>
@@ -88,7 +91,7 @@ export function HistoryScreen() {
         </button>
         <div>
           <h1 className="font-bold">Historial completo</h1>
-          <p className="text-[#A5D6A7] text-xs">{history.name}</p>
+          <p className="text-[#A5D6A7] text-xs">{vendor.name}</p>
         </div>
       </div>
 
@@ -112,7 +115,7 @@ export function HistoryScreen() {
         <div className="px-4 pb-4">
           <h2 className="font-bold text-[#1B5E20] mb-3">Todas las mediciones</h2>
           <div className="space-y-2">
-            {history.measurements.map((measurement, index) => (
+            {(history?.measurements ?? []).map((measurement, index) => (
               <div
                 key={index}
                 className={`bg-white rounded-xl p-4 border ${

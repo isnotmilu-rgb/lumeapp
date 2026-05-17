@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, List, User, SlidersHorizontal, X, Check } from 'lucide-react';
 import { useApp } from '../App';
 import { MapView } from './MapView';
+import { vendors, Vendor } from '../data/vendors';
 import { analyticsService } from '../../services/analytics';
 import L from 'leaflet';
 
@@ -19,7 +20,7 @@ const vendors = [
 const SPECIES_OPTIONS = ['Eucaliptus', 'Roble', 'Coigüe', 'Aromo', 'Raulí'];
 const ZONE_OPTIONS = ['Temuco centro', 'Padre Las Casas', 'Lautaro', 'Freire', 'Vilcún'];
 
-const pinColor = (v: typeof vendors[0]) => {
+const pinColor = (v: Vendor) => {
   if (!v.certified) return '#FF6F00';
   if (v.daysAgo !== null && v.daysAgo <= 2) return '#2E7D32';
   if (v.daysAgo !== null && v.daysAgo <= 5) return '#F9A825';
@@ -63,7 +64,7 @@ export function MapScreen() {
   const [tempFiltros, setTempFiltros] = useState<Filtros>(filtros);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [screenStartTime, setScreenStartTime] = useState<Date>(new Date());
-  const [selectedVendor, setSelectedVendor] = useState<typeof vendors[0] | null>(null);
+  const [selectedVendor, setSelectedVendor] = useState<Vendor | null>(null);
 
   const filterVendors = (filters: Filtros) => {
     return vendors.filter(v => {

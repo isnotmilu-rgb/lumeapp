@@ -98,7 +98,7 @@ export function SellerProfile() {
       </div>
 
       <div className="mx-auto w-full max-w-[1280px] px-4 py-6 sm:px-6 lg:px-8">
-        <section className="rounded-[32px] bg-gradient-to-r from-[#081004] via-[#0f3d12] to-[#1B5E20] p-6 sm:p-8 shadow-[0_30px_80px_rgba(15,23,42,0.12)]">
+        <section className="rounded-[28px] bg-gradient-to-r from-[#081004] via-[#0f3d12] to-[#1B5E20] p-4 sm:p-6 shadow-[0_18px_40px_rgba(15,23,42,0.08)]">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="space-y-4 max-w-3xl">
               <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-[#D9F3C2] shadow-sm">
@@ -143,7 +143,7 @@ export function SellerProfile() {
           </div>
         </section>
 
-        <div className="mt-8 grid gap-8 lg:grid-cols-[1.6fr_0.9fr] lg:items-start">
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1.6fr_0.9fr] lg:items-start">
           <main className="space-y-8">
             <section className="rounded-[28px] bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.06)]">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
