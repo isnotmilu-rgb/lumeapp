@@ -113,8 +113,8 @@ export default function App() {
       }}
     >
       <BrowserRouter>
-        <div className="h-screen w-screen bg-[#f3f4f6] text-[#0f380f]">
-          <div className="h-full w-full bg-[#F9FBE7] overflow-hidden">
+        <div className="h-screen w-screen bg-[#F5F7F4] text-[#0f380f]">
+          <div className="h-full w-full bg-[#F5F7F4] overflow-hidden">
             <Routes>
               <Route path="/" element={<RouteWrapper>{userType ? <Navigate to={userType === 'buyer' ? '/map' : '/dashboard'} /> : <Onboarding />}</RouteWrapper>} />
               <Route path="/onboarding" element={<RouteWrapper><Onboarding /></RouteWrapper>} />
