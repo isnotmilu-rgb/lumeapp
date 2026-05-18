@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, MapPin, List, User, SlidersHorizontal, X, Check } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Search, SlidersHorizontal, X, Check } from 'lucide-react';
 import { useApp } from '../App';
 import { MapView } from './MapView';
+import { BottomNavigation } from './BottomNavigation';
 import { analyticsService } from '../../services/analytics';
 import L from 'leaflet';
 import { vendors } from '../data/vendors';
@@ -48,7 +50,6 @@ interface Filtros { search: string; species: string[]; zones: string[]; precioMa
 export function MapScreen() {
   const navigate = useNavigate();
   const { setCurrentFlow, setCurrentStep } = useApp();
-  const [activeTab, setActiveTab] = useState('map');
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
   const [filtros, setFiltros] = useState<Filtros>({ search: '', species: [], zones: [], precioMax: 60000, soloCertificados: false });
   const [tempFiltros, setTempFiltros] = useState<Filtros>(filtros);
@@ -171,7 +172,7 @@ export function MapScreen() {
       </div>
 
       {/* Main Content - Scrollable */}
-      <div className="flex-1 overflow-y-auto flex flex-col gap-4 p-4 pb-24">
+      <div className="flex-1 overflow-y-auto flex flex-col gap-4 p-4 pb-28">
         {/* Map Section - Fixed Height */}
         <div className="relative w-full rounded-[32px] overflow-hidden shadow-[0_30px_70px_rgba(15,23,42,0.12)] flex-shrink-0 h-[320px] min-h-[320px]">
           <MapView
@@ -236,59 +237,67 @@ export function MapScreen() {
             </div>
           )}
 
-          {selectedVendor && (
-            <div className="absolute inset-0 z-[1100] flex items-end justify-center p-4 pointer-events-none">
-              <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl p-5 pointer-events-auto transition-all duration-300 ease-out">
-                {/* Close Button */}
-                <div className="absolute top-4 right-4">
-                  <button onClick={() => setSelectedVendor(null)} className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
-                    <X size={18} className="text-gray-600" />
+          <AnimatePresence>
+            {selectedVendor && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="absolute inset-0 z-[1100] flex items-end justify-center p-4 pointer-events-none"
+              >
+                <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl p-5 pointer-events-auto transition-all duration-300 ease-out">
+                  {/* Close Button */}
+                  <div className="absolute top-4 right-4">
+                    <button onClick={() => setSelectedVendor(null)} className="p-1.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+                      <X size={18} className="text-gray-600" />
+                    </button>
+                  </div>
+
+                  {/* Badge + Zone */}
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
+                      {selectedVendor.zone === 'temuco' ? 'Temuco Centro' : selectedVendor.zone === 'padre-las-casas' ? 'Padre Las Casas' : 'Alrededores'}
+                    </p>
+                    {selectedVendor.certified && (
+                      <span className="inline-flex items-center gap-1 bg-green-100 px-2.5 py-0.5 rounded-full">
+                        <span className="text-sm font-bold text-green-700">✓ Certificado</span>
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Vendor Info */}
+                  <div className="mb-4">
+                    <h3 className="font-bold text-xl text-gray-900">{selectedVendor.name}</h3>
+                    <p className="text-sm text-gray-600 mt-1">{selectedVendor.species}</p>
+                  </div>
+
+                  {/* Metrics Grid */}
+                  <div className="grid grid-cols-2 gap-3 mb-5">
+                    <div className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-2xl p-3 border border-green-100">
+                      <p className="text-xs font-medium text-gray-600 mb-1">Humedad</p>
+                      <p className="text-lg font-bold text-green-700">{selectedVendor.humidity ? `${selectedVendor.humidity}%` : '—'}</p>
+                    </div>
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl p-3 border border-blue-100">
+                      <p className="text-xs font-medium text-gray-600 mb-1">Precio</p>
+                      <p className="text-lg font-bold text-blue-700">${(selectedVendor.price / 1000).toFixed(0)}k</p>
+                    </div>
+                  </div>
+
+                  {/* CTA Button */}
+                  <button
+                    onClick={() => {
+                      analyticsService.trackVendorInteraction(selectedVendor.id.toString(), 'view_profile_mini_card', { name: selectedVendor.name });
+                      navigate(`/seller/${selectedVendor.id}`);
+                    }}
+                    className="w-full bg-gradient-to-r from-[#2E7D32] to-[#1B5E20] text-white py-3 rounded-2xl font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95"
+                  >
+                    Ver perfil
                   </button>
                 </div>
-
-                {/* Badge + Zone */}
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-gray-500">
-                    {selectedVendor.zone === 'temuco' ? 'Temuco Centro' : selectedVendor.zone === 'padre-las-casas' ? 'Padre Las Casas' : 'Alrededores'}
-                  </p>
-                  {selectedVendor.certified && (
-                    <span className="inline-flex items-center gap-1 bg-green-100 px-2.5 py-0.5 rounded-full">
-                      <span className="text-sm font-bold text-green-700">✓ Certificado</span>
-                    </span>
-                  )}
-                </div>
-
-                {/* Vendor Info */}
-                <div className="mb-4">
-                  <h3 className="font-bold text-xl text-gray-900">{selectedVendor.name}</h3>
-                  <p className="text-sm text-gray-600 mt-1">{selectedVendor.species}</p>
-                </div>
-
-                {/* Metrics Grid */}
-                <div className="grid grid-cols-2 gap-3 mb-5">
-                  <div className="bg-gradient-to-br from-green-50 to-green-100/50 rounded-2xl p-3 border border-green-100">
-                    <p className="text-xs font-medium text-gray-600 mb-1">Humedad</p>
-                    <p className="text-lg font-bold text-green-700">{selectedVendor.humidity ? `${selectedVendor.humidity}%` : '—'}</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl p-3 border border-blue-100">
-                    <p className="text-xs font-medium text-gray-600 mb-1">Precio</p>
-                    <p className="text-lg font-bold text-blue-700">${(selectedVendor.price / 1000).toFixed(0)}k</p>
-                  </div>
-                </div>
-
-                {/* CTA Button */}
-                <button
-                  onClick={() => {
-                    analyticsService.trackVendorInteraction(selectedVendor.id.toString(), 'view_profile_mini_card', { name: selectedVendor.name });
-                    navigate(`/seller/${selectedVendor.id}`);
-                  }}
-                  className="w-full bg-gradient-to-r from-[#2E7D32] to-[#1B5E20] text-white py-3 rounded-2xl font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95"
-                >
-                  Ver perfil
-                </button>
-              </div>
-            </div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {filtered.length === 0 && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/90 backdrop-blur-sm z-[1100]">
@@ -393,35 +402,7 @@ export function MapScreen() {
         </div>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="bg-white border-t border-gray-200 px-8 py-3 flex justify-around items-center flex-shrink-0 safe-area-bottom">
-        <button
-          onClick={() => {
-            setActiveTab('map');
-          }}
-          className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'map' ? 'text-[#2E7D32]' : 'text-gray-400'}`}
-        >
-          <MapPin size={24}/><span className="text-xs">Mapa</span>
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab('list');
-            navigate('/list');
-          }}
-          className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'list' ? 'text-[#2E7D32]' : 'text-gray-400'}`}
-        >
-          <List size={24}/><span className="text-xs">Lista</span>
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab('profile');
-            navigate('/profile/buyer');
-          }}
-          className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'profile' ? 'text-[#2E7D32]' : 'text-gray-400'}`}
-        >
-          <User size={24}/><span className="text-xs">Perfil</span>
-        </button>
-      </div>
+      <BottomNavigation activeTab="map" />
 
       {/* Filter Panel Modal */}
       {filterPanelOpen && (

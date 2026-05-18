@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, List, User, Star, TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { BottomNavigation } from './BottomNavigation';
 import { vendors } from '../data/vendors';
 
 const AVG_PRICE = 43167;
@@ -69,13 +70,13 @@ export function ListScreen() {
     );
 
   return (
-    <div className="min-h-screen bg-[#F9FBE7]">
-      <div className="bg-[#1B5E20] text-white px-4 py-2 flex justify-between items-center text-xs">
+    <div className="min-h-screen bg-[#F9FBE7] flex flex-col">
+      <div className="bg-[#1B5E20] text-white px-4 py-2 flex justify-between items-center text-xs flex-shrink-0">
         <span>9:41</span>
         <span className="font-bold">LumeApp</span>
       </div>
 
-      <div className="bg-[#2E7D32] text-white px-4 py-4 shadow-[0_20px_60px_rgba(15,23,42,0.16)]">
+      <div className="bg-[#2E7D32] text-white px-4 py-4 shadow-[0_20px_60px_rgba(15,23,42,0.16)] flex-shrink-0">
         <h1 className="font-bold text-xl">Lista de vendedores</h1>
 
         <p className="text-[#A5D6A7] text-xs mt-1 max-w-2xl">
@@ -117,7 +118,7 @@ export function ListScreen() {
         </div>
       </div>
 
-      <div className="px-4 py-4 space-y-4 max-w-[1280px] mx-auto">
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 max-w-[1280px] mx-auto pb-28">
         {sorted.map(v => (
           <button
             key={v.id}
@@ -192,28 +193,7 @@ export function ListScreen() {
         <div className="h-4" />
       </div>
 
-      <div className="bg-white border-t border-gray-200 px-8 py-3 flex justify-around items-center flex-shrink-0">
-        <button
-          onClick={() => navigate('/map')}
-          className="flex flex-col items-center gap-1 text-gray-400"
-        >
-          <MapPin size={24}/>
-          <span className="text-xs">Mapa</span>
-        </button>
-
-        <button className="flex flex-col items-center gap-1 text-[#2E7D32]">
-          <List size={24}/>
-          <span className="text-xs">Lista</span>
-        </button>
-
-        <button
-          onClick={() => navigate('/profile/buyer')}
-          className="flex flex-col items-center gap-1 text-gray-400"
-        >
-          <User size={24}/>
-          <span className="text-xs">Perfil</span>
-        </button>
-      </div>
+      <BottomNavigation activeTab="list" />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, MessageCircle, Phone, MapPin } from 'lucide-react';
 import { useApp } from '../App';
+import { BottomNavigation } from './BottomNavigation';
 import { vendors } from '../data/vendors';
 
 export function ContactScreen() {
@@ -40,7 +41,7 @@ export function ContactScreen() {
         </div>
       </div>
 
-      <div className="px-4 pb-10">
+      <div className="px-4 pb-28">
         <div className="mt-4 overflow-hidden rounded-[28px] bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
           <img src={vendor.imageUrl} alt={`${vendor.name}`} className="h-56 w-full object-cover" />
           <div className="p-5">
@@ -110,6 +111,7 @@ export function ContactScreen() {
 
           <p className="text-xs text-slate-400 text-center">Dato verificado por dispositivo, no por el vendedor.</p>
         </div>
+        <BottomNavigation />
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { MapPin, List, User, ChevronRight, User as UserIcon, ShoppingBag, Heart, Settings, HelpCircle, LogOut, Globe, Bell, Shield, Users } from 'lucide-react';
 import { useApp } from '../App';
+import { BottomNavigation } from './BottomNavigation';
 
 export function BuyerProfileScreen() {
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ export function BuyerProfileScreen() {
       </div>
 
       {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="flex-1 overflow-y-auto pb-28" style={{ WebkitOverflowScrolling: 'touch' }}>
         {/* Profile Header */}
         <div className="bg-white p-6 mb-2">
           <div className="flex items-center gap-4">
@@ -140,34 +141,9 @@ export function BuyerProfileScreen() {
               onClick={() => setShowComingSoon(true)}
           />
         </div>
-
-        {/* Bottom padding for navigation */}
-        <div className="h-16"></div>
       </div>
 
-      {/* Bottom Navigation */}
-      <div className="bg-white border-t border-gray-200 px-8 py-3 flex justify-around items-center flex-shrink-0">
-        <button
-          onClick={() => navigate('/map')}
-          className="flex flex-col items-center gap-1 text-gray-400"
-        >
-          <MapPin size={24} />
-          <span className="text-xs">Mapa</span>
-        </button>
-        <button
-          onClick={() => navigate('/list')}
-          className="flex flex-col items-center gap-1 text-gray-400"
-        >
-          <List size={24} />
-          <span className="text-xs">Lista</span>
-        </button>
-        <button
-          className="flex flex-col items-center gap-1 text-[#2E7D32]"
-        >
-          <User size={24} />
-          <span className="text-xs">Perfil</span>
-        </button>
-      </div>
+      <BottomNavigation activeTab="profile" />
     </div>
   );
 }

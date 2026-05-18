@@ -17,6 +17,7 @@ import {
   Wind,
 } from 'lucide-react';
 import { useApp } from '../App';
+import { BottomNavigation } from './BottomNavigation';
 import { vendors } from '../data/vendors';
 
 const featureItems = [
@@ -149,7 +150,7 @@ export function SellerProfile() {
   ];
 
   return (
-    <div className="bg-[#F5F7F4] text-slate-900">
+    <div className="bg-[#F5F7F4] text-slate-900 pb-28">
       {/* Floating / Sticky Back Buttons */}
       <div className="mx-auto w-full max-w-[1280px] px-4 py-2 sm:px-6 lg:px-8">
         <div className="lg:hidden sticky top-0 z-50 bg-gradient-to-b from-white/90 to-transparent py-2">
@@ -418,6 +419,7 @@ export function SellerProfile() {
           </aside>
         </div>
       </div>
+      <BottomNavigation />
     </div>
   );
 }
