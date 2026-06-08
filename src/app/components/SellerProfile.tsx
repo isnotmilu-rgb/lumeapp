@@ -28,10 +28,10 @@ const featureItems = [
 ];
 
 const woodImages = {
-  'Eucaliptus': 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=400',
-  'Coigüe': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400',
-  'Roble': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400',
-  'Avellano': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400',
+  'Eucaliptus': 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?w=400&h=224&fit=crop',
+  'Coigüe': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=224&fit=crop',
+  'Roble': 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=224&fit=crop',
+  'Avellano': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=224&fit=crop',
 };
 
 export function SellerProfile() {
