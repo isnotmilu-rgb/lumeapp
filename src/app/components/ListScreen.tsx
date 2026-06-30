@@ -76,49 +76,53 @@ export function ListScreen() {
         <span className="font-bold">LumeApp</span>
       </div>
 
-      <div className="bg-[#2E7D32] text-white px-4 py-4 shadow-[0_20px_60px_rgba(15,23,42,0.16)] flex-shrink-0">
-        <h1 className="font-bold text-xl">Lista de vendedores</h1>
+      <div className="bg-[#2E7D32] text-white py-4 shadow-[0_20px_60px_rgba(15,23,42,0.16)] flex-shrink-0">
+        <div className="mx-auto w-full max-w-6xl px-4">
+          <h1 className="font-bold text-xl">Lista de vendedores</h1>
 
-        <p className="text-[#A5D6A7] text-xs mt-1 max-w-2xl">
-          {vendors.filter(v => v.certified).length} certificados · {vendors.length} en total
-        </p>
-      </div>
-
-      <div className="bg-white px-3 pt-3 pb-2 border-b border-gray-100 flex-shrink-0">
-        <div className="bg-[#F9FBE7] border border-gray-200 rounded-xl px-3 py-2 flex items-center gap-2 mb-3">
-          <Search size={15} className="text-gray-400"/>
-
-          <input
-            type="text"
-            placeholder="Buscar vendedor..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="flex-1 bg-transparent text-sm outline-none"
-          />
-        </div>
-
-        <div className="flex gap-2">
-          {([
-            ['distance','📍 Distancia'],
-            ['price','💰 Precio'],
-            ['rating','⭐ Calificación']
-          ] as const).map(([key, label]) => (
-            <button
-              key={key}
-              onClick={() => setSortBy(key)}
-              className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                sortBy === key
-                  ? 'bg-[#2E7D32] text-white'
-                  : 'bg-[#F9FBE7] text-gray-600 border border-gray-200'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
+          <p className="text-[#A5D6A7] text-xs mt-1 max-w-2xl">
+            {vendors.filter(v => v.certified).length} certificados · {vendors.length} en total
+          </p>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 max-w-[1280px] mx-auto pb-28">
+      <div className="bg-white pt-3 pb-2 border-b border-gray-100 flex-shrink-0">
+        <div className="mx-auto w-full max-w-6xl px-3">
+          <div className="bg-[#F9FBE7] border border-gray-200 rounded-xl px-3 py-2 flex items-center gap-2 mb-3">
+            <Search size={15} className="text-gray-400"/>
+
+            <input
+              type="text"
+              placeholder="Buscar vendedor..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="flex-1 bg-transparent text-sm outline-none"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            {([
+              ['distance','📍 Distancia'],
+              ['price','💰 Precio'],
+              ['rating','⭐ Calificación']
+            ] as const).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => setSortBy(key)}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                  sortBy === key
+                    ? 'bg-[#2E7D32] text-white'
+                    : 'bg-[#F9FBE7] text-gray-600 border border-gray-200'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto w-full max-w-6xl mx-auto px-4 py-4 space-y-4 pb-28">
         {sorted.map(v => (
           <button
             key={v.id}

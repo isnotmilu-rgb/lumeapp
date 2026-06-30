@@ -182,9 +182,9 @@ export function HistoryScreen() {
         </div>
       </div>
 
-      <div className="px-4 pb-10">
+      <div className="mx-auto w-full max-w-6xl px-4 pb-10">
         <div className="mt-4 overflow-hidden rounded-[28px] bg-white shadow-[0_24px_60px_rgba(15,23,42,0.08)]">
-          <img src={vendor.imageUrl} alt={`${vendor.name}`} className="h-56 w-full object-cover" />
+          <img src={vendor.heroImage || vendor.imageUrl} alt={`${vendor.name}`} className="h-56 w-full object-cover" />
           <div className="p-5">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>

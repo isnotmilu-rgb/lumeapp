@@ -123,8 +123,9 @@ export function Onboarding() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0d3d11] via-[#1B5E20] to-[#2E7D32] px-4 py-8">
-      <div className="mx-auto flex w-full max-w-[430px] flex-col">
-        <div className="mb-8 flex flex-col items-center pt-4">
+      <div className="mx-auto w-full max-w-4xl">
+        <div className="mx-auto flex w-full max-w-[430px] flex-col">
+          <div className="mb-8 flex flex-col items-center pt-4">
           <div
             style={{
               width: '88px',
@@ -139,42 +140,42 @@ export function Onboarding() {
           </div>
           <h1 className="text-3xl font-extrabold tracking-wide text-white">LumeApp</h1>
           <p className="mt-1 text-xs uppercase tracking-[0.2em] text-[#A5D6A7]">Acceso seguro</p>
-        </div>
-
-        {currentView === 'role' && (
-          <div className="space-y-4">
-            <p className="text-center text-sm font-semibold text-white/95">Selecciona cómo quieres acceder</p>
-            <button
-              onClick={() => handleRoleSelect('buyer')}
-              className="w-full rounded-2xl bg-white p-5 text-[#1B5E20] shadow-lg transition-all active:scale-95"
-            >
-              <div className="flex items-center gap-4">
-                <ShoppingBag size={38} strokeWidth={1.5} className="flex-shrink-0" />
-                <div className="text-left">
-                  <div className="text-lg font-bold">Soy Comprador</div>
-                  <div className="mt-0.5 text-sm text-gray-500">Buscar leña seca certificada</div>
-                </div>
-              </div>
-            </button>
-
-            <button
-              onClick={() => handleRoleSelect('vendor')}
-              className="w-full rounded-2xl bg-white p-5 text-[#1B5E20] shadow-lg transition-all active:scale-95"
-            >
-              <div className="flex items-center gap-4">
-                <Store size={38} strokeWidth={1.5} className="flex-shrink-0" />
-                <div className="text-left">
-                  <div className="text-lg font-bold">Soy Vendedor</div>
-                  <div className="mt-0.5 text-sm text-gray-500">Certificar y vender mi leña</div>
-                </div>
-              </div>
-            </button>
           </div>
-        )}
 
-        {currentView !== 'role' && (
-          <div className="rounded-3xl bg-white p-6 shadow-[0_28px_80px_rgba(0,0,0,0.25)]">
-            {renderAuthHeader()}
+          {currentView === 'role' && (
+            <div className="space-y-4">
+              <p className="text-center text-sm font-semibold text-white/95">Selecciona cómo quieres acceder</p>
+              <button
+                onClick={() => handleRoleSelect('buyer')}
+                className="w-full rounded-2xl bg-white p-5 text-[#1B5E20] shadow-lg transition-all active:scale-95"
+              >
+                <div className="flex items-center gap-4">
+                  <ShoppingBag size={38} strokeWidth={1.5} className="flex-shrink-0" />
+                  <div className="text-left">
+                    <div className="text-lg font-bold">Soy Comprador</div>
+                    <div className="mt-0.5 text-sm text-gray-500">Buscar leña seca certificada</div>
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => handleRoleSelect('vendor')}
+                className="w-full rounded-2xl bg-white p-5 text-[#1B5E20] shadow-lg transition-all active:scale-95"
+              >
+                <div className="flex items-center gap-4">
+                  <Store size={38} strokeWidth={1.5} className="flex-shrink-0" />
+                  <div className="text-left">
+                    <div className="text-lg font-bold">Soy Vendedor</div>
+                    <div className="mt-0.5 text-sm text-gray-500">Certificar y vender mi leña</div>
+                  </div>
+                </div>
+              </button>
+            </div>
+          )}
+
+          {currentView !== 'role' && (
+            <div className="rounded-3xl bg-white p-6 shadow-[0_28px_80px_rgba(0,0,0,0.25)]">
+              {renderAuthHeader()}
 
             {currentView === 'login' && (
               <div className="space-y-4">
@@ -353,12 +354,13 @@ export function Onboarding() {
                 Cambiar rol
               </button>
             </div>
-          </div>
-        )}
+            </div>
+          )}
 
-        <p className="mt-8 text-center text-xs text-white/45">
-          Certificación bajo Norma NCh 2965 · Dispositivo IoT
-        </p>
+          <p className="mt-8 text-center text-xs text-white/45">
+            Certificación bajo Norma NCh 2965 · Dispositivo IoT
+          </p>
+        </div>
       </div>
     </div>
   );
