@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, BarChart3, User, Gauge, Shield, Bell, X, Plus, Minus, ChevronRight, TrendingDown, TrendingUp, Settings } from 'lucide-react';
+import { Home, BarChart3, User, Gauge, Shield, Bell, X, Plus, Minus, ChevronRight, TrendingDown, TrendingUp, Settings, Loader2, FileText, Printer, RefreshCw, Wifi } from 'lucide-react';
 import { useApp } from '../App';
+import { vendors } from '../data/vendors';
+import { supabase } from '../services/supabaseClient';
 
 const ZONE_AVG = 44333;
 const MY_PRICE = 45000;
@@ -31,15 +33,119 @@ const alertBg: Record<string, string> = {
   gris: 'bg-gray-50 border-gray-200',
 };
 
+type IotFlowState = 'idle' | 'verifying' | 'preview' | 'success';
+
 export function VendorDashboard() {
   const navigate = useNavigate();
   const { setShowComingSoon } = useApp();
+  const isCamilaSession = window.localStorage.getItem('lume_demo_identity') === 'vendedor_camila';
+  const currentVendor = isCamilaSession
+    ? vendors.find(v => v.id === 'vendedor_camila')
+    : vendors.find(v => v.id === 1);
   const [activeTab, setActiveTab] = useState<'inicio'|'mizona'>('inicio');
   const [alertas, setAlertas] = useState<Alerta[]>(INITIAL_ALERTS);
   const [stock, setStock] = useState(15);
   const [tipsVisible, setTipsVisible] = useState(true);
+  const [iotHumidity, setIotHumidity] = useState<number | null>(null);
+  const [iotLoading, setIotLoading] = useState(false);
+  const [iotError, setIotError] = useState('');
+  const [iotFlowState, setIotFlowState] = useState<IotFlowState>('idle');
+  const [connectionTime, setConnectionTime] = useState('');
+  const [showCertificateModal, setShowCertificateModal] = useState(false);
 
   const priceDiff = MY_PRICE - ZONE_AVG;
+  const publishedAt = window.localStorage.getItem('lume_camila_published_at');
+  const todayLabel = new Date().toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  useEffect(() => {
+    if (iotFlowState !== 'verifying' || !isCamilaSession) return;
+    const verifyTimeout = window.setTimeout(() => {
+      setIotFlowState('preview');
+    }, 2500);
+
+    return () => {
+      window.clearTimeout(verifyTimeout);
+    };
+  }, [iotFlowState, isCamilaSession]);
+
+  useEffect(() => {
+    if (iotFlowState !== 'preview' || !isCamilaSession || !connectionTime) return;
+    let isMounted = true;
+
+    const fetchHumidity = async () => {
+      if (isMounted) {
+        setIotLoading(true);
+      }
+      try {
+        const { data, error } = await supabase
+          .from('mediciones_humedad')
+          .select('valor_humedad, created_at')
+          .eq('vendedor_id', 'vendedor_camila')
+          .gte('created_at', connectionTime)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (!isMounted) return;
+
+        setIotLoading(false);
+        if (error) {
+          console.error('Error real de Supabase:', error);
+          setIotError('No se pudo consultar el sensor en este momento.');
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          setIotError('');
+          setIotHumidity(null);
+          return;
+        }
+
+        const humidityValue = data[0]?.valor_humedad;
+        const parsedHumidity = typeof humidityValue === 'number' ? humidityValue : Number(humidityValue);
+        if (Number.isNaN(parsedHumidity)) {
+          setIotError('La lectura recibida no tiene un formato válido.');
+          setIotHumidity(null);
+          return;
+        }
+
+        setIotHumidity(parsedHumidity);
+        setIotError('');
+      } catch (error) {
+        if (!isMounted) return;
+        setIotLoading(false);
+        console.error('Error real de Supabase:', error);
+        setIotError('No se pudo consultar el sensor en este momento.');
+      }
+    };
+
+    void fetchHumidity();
+    const intervalId = window.setInterval(() => {
+      void fetchHumidity();
+    }, 2000);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(intervalId);
+    };
+  }, [iotFlowState, isCamilaSession, connectionTime]);
+
+  const handlePublishLot = () => {
+    if (iotHumidity === null) {
+      return;
+    }
+    setIotFlowState('success');
+    window.localStorage.setItem('lume_camila_published_humidity', iotHumidity.toString());
+    window.localStorage.setItem('lume_camila_published_at', new Date().toISOString());
+  };
+
+  const handleResetMeasurement = () => {
+    setIotFlowState('idle');
+    setIotHumidity(null);
+    setIotError('');
+    setIotLoading(false);
+    setShowCertificateModal(false);
+    setConnectionTime('');
+  };
 
   return (
     <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }} className="bg-[#F9FBE7]">
@@ -51,8 +157,8 @@ export function VendorDashboard() {
       {/* Top bar with settings icon */}
       <div className="bg-[#2E7D32] text-white px-4 py-3 flex items-center justify-between flex-shrink-0">
         <div>
-          <h1 className="font-bold text-base">Hola, Leñas Boyeco 👋</h1>
-          <p className="text-[#A5D6A7] text-xs">Panel de vendedor · Temuco</p>
+          <h1 className="font-bold text-base">{isCamilaSession ? 'Hola, Leñería Camila 🔥' : `Hola, ${currentVendor?.name ?? 'Vendedor'} 👋`}</h1>
+          <p className="text-[#A5D6A7] text-xs">Panel de vendedor · {isCamilaSession ? 'Temuco' : currentVendor?.zone === 'padre-las-casas' ? 'Padre Las Casas' : currentVendor?.zone === 'alrededores' ? 'Alrededores' : 'Temuco'}</p>
         </div>
         <button onClick={() => navigate('/profile/vendor')} className="p-2 hover:bg-white/10 rounded-full transition-colors">
           <Settings size={20}/>
@@ -103,6 +209,107 @@ export function VendorDashboard() {
                 <span>Medido hace 1 día</span><span>Vigente 6 días más</span>
               </div>
             </div>
+
+            {isCamilaSession && (
+              <div className="bg-white rounded-xl p-4 shadow-sm border border-[#BBDEFB]">
+                <h3 className="font-bold text-[#0D47A1] mb-2">Módulo IoT Activado</h3>
+                <p className="text-xs text-slate-600 mb-3">Conectado a mediciones_humedad · vendedor_camila</p>
+                <div className="mb-3 grid grid-cols-2 gap-2">
+                  <div className="rounded-lg bg-[#F8FBFF] px-3 py-2 text-xs text-[#0D47A1] border border-[#BBDEFB]">Batería: 87% 🔋</div>
+                  <div className="rounded-lg bg-[#F8FBFF] px-3 py-2 text-xs text-[#0D47A1] border border-[#BBDEFB]">Señal Wi-Fi: Excelente 📶</div>
+                </div>
+                {iotFlowState === 'idle' && (
+                  <button
+                    onClick={() => {
+                      handleResetMeasurement();
+                      setConnectionTime(new Date().toISOString());
+                      setIotFlowState('verifying');
+                    }}
+                    className="w-full bg-[#0D47A1] text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-[#0b3f91] transition-colors"
+                  >
+                    Conectar con Sensor ESP32
+                  </button>
+                )}
+
+                {iotFlowState === 'verifying' && (
+                  <div className="mt-3 rounded-lg bg-[#E3F2FD] p-3">
+                    <div className="flex items-center gap-2 text-[#0D47A1] text-sm font-medium">
+                      <Loader2 size={16} className="animate-spin" />
+                      Verificando estado del sensor en terreno...
+                    </div>
+                  </div>
+                )}
+
+                {iotFlowState === 'preview' && (
+                  <div className="mt-3 rounded-lg bg-[#E3F2FD] p-4">
+                    <p className="text-sm font-semibold text-[#0D47A1] text-center">Sensor Conectado 📶. Humedad actual en vivo:</p>
+                    <div className="mt-3 mx-auto h-28 w-28 rounded-full border-4 border-[#90CAF9] bg-white flex items-center justify-center">
+                      {iotHumidity !== null ? (
+                        <p className="text-3xl font-bold text-[#0D47A1]">{`${iotHumidity}%`}</p>
+                      ) : (
+                        <Wifi size={34} className="text-[#0D47A1] animate-pulse" />
+                      )}
+                    </div>
+                    {iotHumidity === null && !iotError && (
+                      <p className="mt-3 text-center text-xs font-medium text-[#0D47A1] animate-pulse">
+                        Esperando señal...
+                      </p>
+                    )}
+                    {iotHumidity === null && !iotError && (
+                      <p className="mt-1 text-center text-xs text-[#0D47A1]/80">
+                        Sensor en línea 📶. Por favor, realiza la medición en terreno ahora...
+                      </p>
+                    )}
+                    {iotLoading && (
+                      <div className="mt-2 flex items-center justify-center gap-2 text-[#0D47A1] text-xs">
+                        <Loader2 size={14} className="animate-spin" />
+                        Actualizando lectura...
+                      </div>
+                    )}
+                    {iotError && <p className="mt-2 text-xs text-red-600">{iotError}</p>}
+                    <button
+                      onClick={handlePublishLot}
+                      disabled={iotHumidity === null}
+                      className="mt-3 w-full rounded-lg bg-[#2E7D32] py-2.5 text-sm font-semibold text-white transition hover:bg-[#1B5E20] disabled:cursor-not-allowed disabled:bg-[#A5D6A7]"
+                    >
+                      Certificar y Publicar Lote
+                    </button>
+                    <button
+                      onClick={handleResetMeasurement}
+                      className="mt-2 w-full rounded-lg border border-slate-300 bg-white py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                    >
+                      Cancelar / Volver
+                    </button>
+                  </div>
+                )}
+
+                {iotFlowState === 'success' && (
+                  <div className="mt-3 rounded-lg border border-[#A5D6A7] bg-[#E8F5E9] p-3">
+                    <p className="text-sm font-semibold text-[#1B5E20]">¡Humedad publicada para los compradores! ✅</p>
+                    <p className="mt-2 text-3xl font-bold text-[#1B5E20]">{iotHumidity !== null ? `${iotHumidity}%` : '--%'}</p>
+                    {iotHumidity !== null && iotHumidity < 20 && (
+                      <button
+                        onClick={() => setShowCertificateModal(true)}
+                        className="mt-3 w-full rounded-lg bg-[#0D47A1] py-2.5 text-sm font-semibold text-white transition hover:bg-[#0b3f91] flex items-center justify-center gap-2"
+                      >
+                        <FileText size={16} />
+                        Descargar Certificado de Calidad LumeApp
+                      </button>
+                    )}
+                    <button
+                      onClick={handleResetMeasurement}
+                      className="mt-3 w-full rounded-lg border border-slate-300 bg-white py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 flex items-center justify-center gap-2"
+                    >
+                      <RefreshCw size={16} />
+                      Medir otro Lote
+                    </button>
+                    {publishedAt && (
+                      <p className="mt-2 text-xs text-[#1B5E20]/75">Publicado: {new Date(publishedAt).toLocaleString('es-CL')}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Stock control */}
             <div className="bg-white rounded-xl p-4 shadow-sm">
@@ -245,6 +452,34 @@ export function VendorDashboard() {
         <button onClick={() => navigate('/certification')} className="flex flex-col items-center gap-1 text-gray-400"><Shield size={22}/><span className="text-xs">Certificación</span></button>
         <button onClick={() => navigate('/profile/vendor')} className="flex flex-col items-center gap-1 text-gray-400"><User size={22}/><span className="text-xs">Perfil</span></button>
       </div>
+
+      {showCertificateModal && (
+        <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-[0_35px_90px_rgba(15,23,42,0.35)]">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-[#1B5E20]">Certificado de Calidad LumeApp</h3>
+              <button onClick={() => setShowCertificateModal(false)} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>
+            </div>
+            <div className="rounded-xl border border-[#A5D6A7] bg-[#F7FCF8] p-5">
+              <p className="text-xs uppercase tracking-[0.2em] text-[#2E7D32]">Leña Seca Certificada</p>
+              <p className="mt-2 text-sm text-slate-700"><span className="font-semibold">Proveedor:</span> Leñería Camila</p>
+              <p className="text-sm text-slate-700"><span className="font-semibold">Fecha:</span> {todayLabel}</p>
+              <p className="text-sm text-slate-700"><span className="font-semibold">Humedad medida:</span> {iotHumidity !== null ? `${iotHumidity}%` : '--%'}</p>
+              <div className="mt-4 grid grid-cols-[1fr_auto] items-center gap-4">
+                <div className="text-xs text-slate-600">Código de validación: LUME-CAMILA-{new Date().getFullYear()}-001</div>
+                <div className="h-20 w-20 rounded-md border border-slate-300 bg-[repeating-linear-gradient(45deg,#0f172a_0,#0f172a_2px,#fff_2px,#fff_4px)]" />
+              </div>
+            </div>
+            <button
+              onClick={() => window.print()}
+              className="mt-4 w-full rounded-xl bg-[#2E7D32] py-3 text-sm font-bold text-white transition hover:bg-[#1B5E20] flex items-center justify-center gap-2"
+            >
+              <Printer size={16} />
+              Imprimir / Guardar
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

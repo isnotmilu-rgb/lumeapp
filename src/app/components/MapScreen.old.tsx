@@ -129,8 +129,7 @@ export function MapScreen() {
     <div className="h-screen w-full flex flex-col bg-[#F0F7F0] overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-[#1B5E20] to-[#2E7D32] text-white px-4 py-3 flex-shrink-0 shadow-lg">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs opacity-90">9:41</span>
+        <div className="flex items-center justify-center mb-1">
           <span className="font-bold text-sm">LumeApp</span>
         </div>
         <div className="text-center">

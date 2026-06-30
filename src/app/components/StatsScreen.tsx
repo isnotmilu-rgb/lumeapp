@@ -20,6 +20,12 @@ const maxVisitas = Math.max(...datosSemana.map(d => d.visitas));
 export function StatsScreen() {
   const navigate = useNavigate();
   const { setShowComingSoon } = useApp();
+  const isCamilaSession = window.localStorage.getItem('lume_demo_identity') === 'vendedor_camila';
+  const dryingTrend = [
+    { label: 'Hace 2 días', humidity: 19.1 },
+    { label: 'Hace 4 días', humidity: 21.3 },
+    { label: 'Hace 7 días', humidity: 24.5 },
+  ];
 
   return (
     <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }} className="bg-[#F9FBE7]">
@@ -48,6 +54,30 @@ export function StatsScreen() {
                 {cambio > 0 ? '+' : ''}{cambio}
               </span>
             </div>
+
+            {isCamilaSession && (
+              <div className="bg-white rounded-xl p-4 shadow-sm border border-[#BBDEFB]">
+                <h3 className="font-bold text-[#0D47A1] mb-1">Tendencia de Secado · Patio de Acopio</h3>
+                <p className="text-xs text-slate-500 mb-3">Historial de mediciones simuladas para Leñería Camila</p>
+                <div className="space-y-3">
+                  {dryingTrend.map(item => {
+                    const progress = Math.min((item.humidity / 30) * 100, 100);
+                    const isDry = item.humidity < 20;
+                    return (
+                      <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-slate-600">{item.label}</span>
+                          <span className={`text-sm font-bold ${isDry ? 'text-[#047857]' : 'text-[#B45309]'}`}>{item.humidity}%</span>
+                        </div>
+                        <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
+                          <div className={`h-full rounded-full ${isDry ? 'bg-[#10B981]' : 'bg-[#F59E0B]'}`} style={{ width: `${progress}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="text-center mb-5">

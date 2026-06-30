@@ -7,8 +7,7 @@ export function HowItWorksScreen() {
   return (
     <div className="h-[820px] flex flex-col bg-[#F9FBE7] overflow-hidden">
       {/* Status Bar */}
-      <div className="bg-[#1B5E20] text-white px-4 py-2 flex justify-between items-center text-xs flex-shrink-0">
-        <span>9:41</span>
+      <div className="bg-[#1B5E20] text-white px-4 py-2 flex justify-center items-center text-xs flex-shrink-0">
         <span className="font-bold">LumeApp</span>
       </div>
 

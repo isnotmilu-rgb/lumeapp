@@ -3,9 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft,
   CheckCircle,
+  Loader2,
   Heart,
   Leaf,
-  MessageCircle,
+  CreditCard,
   MapPin,
   Package,
   Scissors,
@@ -18,6 +19,7 @@ import {
 import { useApp } from '../App';
 import { BottomNavigation } from './BottomNavigation';
 import { vendors } from '../data/vendors';
+import { supabase } from '../services/supabaseClient';
 
 const featureItems = [
   { icon: ShieldCheck, label: 'Cert. NCh 2965' },
@@ -29,8 +31,9 @@ const featureItems = [
 export function SellerProfile() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const { setShowComingSoon, setCurrentStep } = useApp();
-  const vendor = vendors.find(vendor => vendor.id === Number(id));
+  const { setCurrentStep, userType } = useApp();
+  const vendor = vendors.find(vendor => String(vendor.id) === String(id));
+  const isCamilaLiveVendor = id === 'vendedor_camila' && userType === 'buyer';
   const [selectedMeters, setSelectedMeters] = useState(1);
   const woodTypes = vendor?.woods.map(wood => wood.name) ?? ['Eucaliptus', 'Roble', 'Coigüe'];
   const [selectedWood, setSelectedWood] = useState<string>(vendor?.woods?.[0]?.name ?? woodTypes[0]);
@@ -60,13 +63,34 @@ export function SellerProfile() {
   const ratingStars = Array.from({ length: 5 }, (_, index) => index < Math.round(vendor?.rating ?? 0));
   const [loading, setLoading] = useState(true);
   const [woodImageLoaded, setWoodImageLoaded] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [modalMeters, setModalMeters] = useState(1);
+  const [liveHumidity, setLiveHumidity] = useState<number | null>(null);
+  const [liveLoading, setLiveLoading] = useState(false);
+  const [liveError, setLiveError] = useState('');
+  const [publishedHumidity, setPublishedHumidity] = useState<number | null>(null);
+  const [measurementHistory, setMeasurementHistory] = useState<Array<{ valor_humedad: number; created_at: string }>>([]);
 
-  const sendWhatsApp = () => {
+  const startCheckout = (quantity: number) => {
     setCurrentStep(4);
-    const total = selectedWoodOption ? selectedWoodOption.price * selectedMeters : 0;
-    const message = `Hola, vi tu publicación en LumeApp. Me interesa comprar ${selectedMeters}m³ de ${selectedWoodOption?.name ?? selectedWood} con ${vendor?.name} por un total de $${total.toLocaleString('es-CL')}. ¿Podemos coordinar entrega?`;
-    const whatsappUrl = `https://wa.me/56900000000?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+    setSelectedMeters(quantity);
+    setIsConfirmModalOpen(false);
+    navigate('/checkout', {
+      state: {
+        vendorName: vendor?.name,
+        woodType: selectedWoodOption?.name ?? selectedWood,
+        quantity,
+        meters: quantity,
+        unitPrice: selectedWoodOption?.price ?? vendor?.price ?? 15000,
+        totalPrice: (selectedWoodOption?.price ?? vendor?.price ?? 15000) * quantity,
+        total: (selectedWoodOption?.price ?? vendor?.price ?? 15000) * quantity,
+      },
+    });
+  };
+
+  const openCheckoutConfirmation = () => {
+    setModalMeters(selectedMeters);
+    setIsConfirmModalOpen(true);
   };
 
   useEffect(() => {
@@ -83,6 +107,66 @@ export function SellerProfile() {
     const timer = window.setTimeout(() => setLoading(false), 180);
     return () => window.clearTimeout(timer);
   }, [vendor?.id]);
+
+  useEffect(() => {
+    if (!isCamilaLiveVendor) return;
+    const storedPublishedHumidity = window.localStorage.getItem('lume_camila_published_humidity');
+    if (storedPublishedHumidity !== null) {
+      const parsedHumidity = Number(storedPublishedHumidity);
+      if (!Number.isNaN(parsedHumidity)) {
+        setPublishedHumidity(parsedHumidity);
+      }
+    }
+
+    let isMounted = true;
+
+    const fetchLatestCamilaMeasurement = async () => {
+      if (isMounted) {
+        setLiveLoading(true);
+      }
+      const { data, error } = await supabase
+        .from('mediciones_humedad')
+        .select('valor_humedad, created_at')
+        .eq('vendedor_id', 'vendedor_camila')
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (!isMounted) return;
+
+      setLiveLoading(false);
+      if (error) {
+        setLiveError('No fue posible actualizar el sensor en vivo.');
+        return;
+      }
+
+      const parsedHistory = (data ?? [])
+        .map((item) => {
+          const humidityValue = Number(item?.valor_humedad);
+          if (Number.isNaN(humidityValue) || typeof item?.created_at !== 'string') {
+            return null;
+          }
+          return {
+            valor_humedad: humidityValue,
+            created_at: item.created_at,
+          };
+        })
+        .filter((item): item is { valor_humedad: number; created_at: string } => item !== null);
+
+      setMeasurementHistory(parsedHistory);
+      setLiveError('');
+      setLiveHumidity(parsedHistory.length > 0 ? parsedHistory[0].valor_humedad : null);
+    };
+
+    void fetchLatestCamilaMeasurement();
+    const interval = window.setInterval(() => {
+      void fetchLatestCamilaMeasurement();
+    }, 3000);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(interval);
+    };
+  }, [isCamilaLiveVendor]);
 
   if (!vendor) {
     return (
@@ -147,6 +231,29 @@ export function SellerProfile() {
       status: (vendor.humidity !== null ? vendor.humidity + 2 : 26) <= 20 ? 'Óptimo' : 'Aceptable',
     },
   ];
+  const timelineMeasurements = isCamilaLiveVendor
+    ? measurementHistory.map((measurement) => {
+        const measurementDate = new Date(measurement.created_at);
+        return {
+          key: measurement.created_at,
+          humidity: measurement.valor_humedad,
+          date: measurementDate.toLocaleDateString('es-CL', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          }),
+          time: measurementDate.toLocaleTimeString('es-CL', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+        };
+      })
+    : measurements.map((measurement, index) => ({
+        key: `${measurement.date}-${measurement.time}-${index}`,
+        humidity: measurement.humidity,
+        date: measurement.date,
+        time: measurement.time,
+      }));
 
   return (
     <div className="bg-[#F5F7F4] text-slate-900 pb-28">
@@ -325,45 +432,67 @@ export function SellerProfile() {
                   <p className="mt-1 text-sm text-slate-600">Historial de humedad verificado y transparente</p>
                 </div>
                 <button
-                  onClick={() => navigate(`/history/${id}`)}
+                  onClick={() => navigate(`/history/${String(vendor?.id ?? id ?? '')}`)}
                   className="rounded-full bg-[#E8F5E9] px-5 py-2 text-sm font-semibold text-[#1B5E20] transition hover:bg-[#D7EDDB] hover:shadow-sm"
                 >
                   Ver histórico completo
                 </button>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {measurements.map((measurement, index) => {
-                  const isOptimal = measurement.status === 'Óptimo';
-                  const humidityPercent = measurement.humidity;
-                  return (
-                    <div key={index} className={`rounded-[22px] border-2 p-5 transition-all ${isOptimal ? 'border-[#10B981]/30 bg-gradient-to-br from-[#ECFDF5] to-white' : 'border-[#FCD34D]/30 bg-gradient-to-br from-[#FFFBEB] to-white'}`}>
-                      <div className="flex items-center justify-between mb-4">
-                        <div className={`h-3 w-3 rounded-full ${isOptimal ? 'bg-[#10B981]' : 'bg-[#F59E0B]'}`} />
-                        <span className={`text-xs font-bold px-3 py-1 rounded-full ${isOptimal ? 'bg-[#ECFDF5] text-[#047857]' : 'bg-[#FFFBEB] text-[#B45309]'}`}>
-                          {measurement.status}
-                        </span>
-                      </div>
-
-                      <p className={`text-4xl font-bold mb-1 ${isOptimal ? 'text-[#047857]' : 'text-[#B45309]'}`}>
-                        {humidityPercent}%
-                      </p>
-                      <p className="text-xs text-slate-500 mb-3">Humedad relativa</p>
-
-                      {/* Barra visual de humedad */}
-                      <div className="mb-3 h-2 rounded-full bg-gray-200 overflow-hidden">
-                        <div
-                          className={`h-full transition-all ${isOptimal ? 'bg-[#10B981]' : 'bg-[#F59E0B]'}`}
-                          style={{ width: `${Math.min(humidityPercent * 2, 100)}%` }}
-                        />
-                      </div>
-
-                      <p className="text-xs text-slate-600">{measurement.date}</p>
-                      <p className="text-xs text-slate-500">{measurement.time}</p>
+              {isCamilaLiveVendor && (
+                <div className="mb-6 rounded-[20px] border border-[#BBDEFB] bg-[#E3F2FD] p-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#0D47A1]">Sensor en vivo · Vendedor 11</p>
+                  {liveLoading ? (
+                    <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#0D47A1]">
+                      <Loader2 size={16} className="animate-spin" />
+                      Actualizando humedad...
                     </div>
-                  );
-                })}
-              </div>
+                  ) : (
+                    <p className="mt-2 text-xl font-bold text-[#0D47A1]">
+                      {publishedHumidity !== null ? `${publishedHumidity}%` : liveHumidity !== null ? `${liveHumidity}%` : 'Sin dato disponible'}
+                    </p>
+                  )}
+                  {(publishedHumidity !== null || liveHumidity !== null) && (
+                    <p className={`mt-2 text-sm font-semibold ${(publishedHumidity ?? liveHumidity ?? 0) < 20 ? 'text-[#047857]' : 'text-red-600'}`}>
+                      {(publishedHumidity ?? liveHumidity ?? 0) < 20 ? 'Leña Seca Certificada Real ✅' : 'Leña Húmeda ❌'}
+                    </p>
+                  )}
+                  {liveError && <p className="mt-2 text-sm text-red-600">{liveError}</p>}
+                </div>
+              )}
+
+              {isCamilaLiveVendor && timelineMeasurements.length === 0 ? (
+                <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-5 py-6 text-sm text-slate-600">
+                  Este vendedor aún no registra un historial de mediciones certificadas.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {timelineMeasurements.map((measurement, index) => {
+                    const isDry = measurement.humidity < 20;
+                    return (
+                      <div key={measurement.key} className="rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-3">
+                            <div className={`h-2.5 w-2.5 rounded-full ${isDry ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                            <p className="text-base font-bold text-slate-900">{measurement.humidity.toFixed(1)}% Humedad</p>
+                          </div>
+                          <span
+                            className={`rounded-full px-3 py-1 text-xs font-bold ${
+                              isDry ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
+                            }`}
+                          >
+                            {isDry ? 'Seca' : 'Húmeda'}
+                          </span>
+                        </div>
+                        <p className="mt-2 text-xs text-slate-500">
+                          {measurement.date} · {measurement.time}
+                        </p>
+                        {index < timelineMeasurements.length - 1 && <div className="mt-3 h-px bg-slate-100" />}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </section>
           </main>
 
@@ -456,11 +585,11 @@ export function SellerProfile() {
 
               {/* MEJORA 8: Botón WhatsApp Premium */}
               <button
-                onClick={sendWhatsApp}
+                onClick={openCheckoutConfirmation}
                 className="w-full bg-gradient-to-r from-[#25D366] to-[#1ebd5d] text-white py-4 px-4 rounded-[18px] font-bold text-base flex items-center justify-center gap-3 shadow-[0_12px_30px_rgba(37,211,102,0.3)] transition-all duration-300 hover:shadow-[0_16px_40px_rgba(37,211,102,0.4)] hover:scale-[1.02] active:scale-95"
               >
-                <MessageCircle size={20} />
-                Contactar por WhatsApp
+                <CreditCard size={20} />
+                Pagar con Webpay Plus
               </button>
 
               {/* Quick Info */}
@@ -473,6 +602,62 @@ export function SellerProfile() {
           </aside>
         </div>
       </div>
+
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-md rounded-3xl bg-white p-6 shadow-[0_30px_80px_rgba(15,23,42,0.35)]">
+            <h3 className="text-xl font-bold text-[#1B5E20]">Confirmar Pedido de Leña</h3>
+
+            <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Cantidad (m³)</p>
+              <div className="mt-3 flex items-center gap-3">
+                <button
+                  onClick={() => setModalMeters(value => Math.max(1, value - 1))}
+                  className="h-10 w-10 rounded-full border-2 border-slate-300 text-xl font-bold text-slate-700 transition hover:border-[#2E7D32] hover:text-[#2E7D32]"
+                >
+                  −
+                </button>
+                <div className="flex-1 text-center text-2xl font-bold text-slate-900">{modalMeters}</div>
+                <button
+                  onClick={() => setModalMeters(value => Math.min(selectedWoodOption?.available ?? value, value + 1))}
+                  className="h-10 w-10 rounded-full border-2 border-[#2E7D32] bg-[#2E7D32] text-xl font-bold text-white transition hover:bg-[#1B5E20]"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-[#C8E6C9] bg-[#F1F8E9] p-4">
+              <p className="text-sm text-slate-700">
+                Precio por metro: <span className="font-semibold text-slate-900">${(selectedWoodOption?.price ?? vendor.price).toLocaleString('es-CL')}</span>
+              </p>
+              <p className="mt-2 text-lg font-bold text-[#1B5E20]">
+                Total a Pagar: ${((selectedWoodOption?.price ?? vendor.price) * modalMeters).toLocaleString('es-CL')}
+              </p>
+            </div>
+
+            <p className="mt-4 text-sm text-slate-600">
+              ¿Estás seguro de que deseas proceder al pago seguro de este pedido?
+            </p>
+
+            <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <button
+                onClick={() => setIsConfirmModalOpen(false)}
+                className="rounded-xl border border-slate-300 bg-white py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => startCheckout(modalMeters)}
+                className="rounded-xl bg-[#2E7D32] py-3 text-sm font-bold text-white transition hover:bg-[#1B5E20] flex items-center justify-center gap-2"
+              >
+                <CreditCard size={16} />
+                Confirmar e ir a Pagar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <BottomNavigation />
     </div>

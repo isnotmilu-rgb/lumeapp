@@ -8,6 +8,7 @@ export function BuyerProfileScreen() {
   const { setShowComingSoon, setUserType } = useApp();
 
   const handleLogout = () => {
+    window.localStorage.removeItem('lume_demo_identity');
     setUserType(null);
     navigate('/onboarding');
   };
@@ -25,9 +26,8 @@ export function BuyerProfileScreen() {
 
   return (
     <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }} className="bg-[#F9FBE7]">
-      {/* Status Bar */}
-      <div className="bg-[#1B5E20] text-white px-4 py-2 flex justify-between items-center text-xs flex-shrink-0">
-        <span>9:41</span>
+      {/* Status Bar sin hora y centrado */}
+      <div className="bg-[#1B5E20] text-white px-4 py-2 flex justify-center items-center text-xs flex-shrink-0">
         <span className="font-bold">LumeApp</span>
       </div>
 
@@ -111,7 +111,7 @@ export function BuyerProfileScreen() {
           <MenuItem
             icon={Users}
             label="Cambiar tipo de usuario"
-              onClick={handleLogout}
+            onClick={handleLogout}
           />
         </div>
 

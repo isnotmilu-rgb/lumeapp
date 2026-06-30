@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle, Info } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Loader2 } from 'lucide-react';
 import { vendors } from '../data/vendors';
+import { supabase } from '../services/supabaseClient';
 
 const vendorHistory = {
   1: {
@@ -62,12 +64,100 @@ const vendorHistory = {
   }
 };
 
+type HistoryMeasurement = {
+  key: string;
+  date: string;
+  time: string;
+  humidity: number;
+  species: string;
+  verified: boolean;
+  status: 'Vigente' | 'Expirada';
+};
+
 export function HistoryScreen() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const idNum = Number(id);
-  const vendor = vendors.find(v => v.id === idNum);
-  const history = vendorHistory[idNum as keyof typeof vendorHistory];
+  const sessionIdentity = window.localStorage.getItem('lume_demo_identity');
+  const resolvedVendorId = id === 'vendedor_camila' || sessionIdentity === 'vendedor_camila' ? 'vendedor_camila' : String(id ?? '');
+  const idNum = Number(resolvedVendorId);
+  const isCamilaVendor = resolvedVendorId === 'vendedor_camila';
+  const vendor = vendors.find(v => String(v.id) === resolvedVendorId);
+  const history = Number.isNaN(idNum) ? undefined : vendorHistory[idNum as keyof typeof vendorHistory];
+  const [camilaMeasurements, setCamilaMeasurements] = useState<HistoryMeasurement[]>([]);
+  const [camilaLoading, setCamilaLoading] = useState(false);
+  const [camilaError, setCamilaError] = useState('');
+
+  useEffect(() => {
+    if (!isCamilaVendor) return;
+    let isMounted = true;
+
+    const fetchCamilaHistory = async () => {
+      if (isMounted) {
+        setCamilaLoading(true);
+      }
+
+      const { data, error } = await supabase
+        .from('mediciones_humedad')
+        .select('valor_humedad, created_at')
+        .eq('vendedor_id', 'vendedor_camila')
+        .order('created_at', { ascending: false })
+        .limit(25);
+
+      if (!isMounted) return;
+
+      setCamilaLoading(false);
+      if (error) {
+        console.error('Error real de Supabase:', error);
+        setCamilaError('No se pudo cargar el historial en este momento.');
+        return;
+      }
+
+      const mappedMeasurements: HistoryMeasurement[] = (data ?? [])
+        .map((measurement) => {
+          const humidity = Number(measurement?.valor_humedad);
+          const createdAt = typeof measurement?.created_at === 'string' ? new Date(measurement.created_at) : null;
+          if (Number.isNaN(humidity) || !createdAt || Number.isNaN(createdAt.getTime())) {
+            return null;
+          }
+
+          return {
+            key: measurement.created_at,
+            date: createdAt.toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' }),
+            time: createdAt.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
+            humidity,
+            species: 'Eucaliptus',
+            verified: true,
+            status: 'Vigente',
+          } as HistoryMeasurement;
+        })
+        .filter((measurement): measurement is HistoryMeasurement => measurement !== null);
+
+      setCamilaMeasurements(mappedMeasurements);
+      setCamilaError('');
+    };
+
+    void fetchCamilaHistory();
+    const interval = window.setInterval(() => {
+      void fetchCamilaHistory();
+    }, 3000);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(interval);
+    };
+  }, [isCamilaVendor]);
+
+  const renderedMeasurements: HistoryMeasurement[] = isCamilaVendor
+    ? camilaMeasurements
+    : (history?.measurements ?? []).map((measurement, index) => ({
+        key: `${measurement.date}-${measurement.time}-${index}`,
+        date: measurement.date,
+        time: measurement.time,
+        humidity: measurement.humidity,
+        species: measurement.species,
+        verified: measurement.verified,
+        status: measurement.status as 'Vigente' | 'Expirada',
+      }));
 
   if (!vendor) return (
     <div className="min-h-screen flex flex-col items-center justify-center">
@@ -78,8 +168,7 @@ export function HistoryScreen() {
 
   return (
     <div className="min-h-screen bg-[#F9FBE7]">
-      <div className="bg-[#1B5E20] text-white px-4 py-2 flex justify-between items-center text-xs">
-        <span>9:41</span>
+      <div className="bg-[#1B5E20] text-white px-4 py-2 flex justify-center items-center text-xs">
         <span className="font-bold">LumeApp</span>
       </div>
 
@@ -128,15 +217,31 @@ export function HistoryScreen() {
               <h2 className="text-xl font-semibold text-slate-900">Todas las mediciones</h2>
               <p className="mt-1 text-sm text-slate-500">Revisa el historial completo de humedad y certificados.</p>
             </div>
-            <span className="rounded-full bg-[#E8F5E9] px-3 py-2 text-xs font-semibold text-[#1B5E20]">{(history?.measurements ?? []).length} entradas</span>
+          <span className="rounded-full bg-[#E8F5E9] px-3 py-2 text-xs font-semibold text-[#1B5E20]">{renderedMeasurements.length} entradas</span>
           </div>
 
           <div className="mt-5 space-y-4">
-            {(history?.measurements ?? []).map((measurement, index) => (
-              <div
-                key={index}
-                className={`rounded-[24px] border p-4 ${measurement.status === 'Vigente' ? 'border-[#2E7D32] bg-[#F0FFF4]' : 'border-slate-200 bg-white'}`}
-              >
+          {isCamilaVendor && camilaLoading && renderedMeasurements.length === 0 && (
+            <div className="rounded-[24px] border border-[#BBDEFB] bg-[#E3F2FD] p-4 text-sm text-[#0D47A1] inline-flex items-center gap-2">
+              <Loader2 size={16} className="animate-spin" />
+              Cargando historial en vivo...
+            </div>
+          )}
+          {isCamilaVendor && !camilaLoading && renderedMeasurements.length === 0 && !camilaError && (
+            <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+              Este vendedor aún no registra un historial de mediciones certificadas.
+            </div>
+          )}
+          {camilaError && (
+            <div className="rounded-[24px] border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              {camilaError}
+            </div>
+          )}
+          {renderedMeasurements.map((measurement) => (
+            <div
+              key={measurement.key}
+              className={`rounded-[24px] border p-4 ${measurement.status === 'Vigente' ? 'border-[#2E7D32] bg-[#F0FFF4]' : 'border-slate-200 bg-white'}`}
+            >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <div className="font-semibold text-[#1B5E20]">{measurement.date}</div>
