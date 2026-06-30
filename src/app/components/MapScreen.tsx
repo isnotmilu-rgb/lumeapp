@@ -418,9 +418,9 @@ export function MapScreen() {
 
       {/* Filter Panel Modal */}
       {filterPanelOpen && (
-        <div className="absolute inset-0 z-[1100] flex flex-col">
-          <div className="flex-1 bg-black/40" onClick={() => setFilterPanelOpen(false)} />
-          <div className="bg-white rounded-t-2xl shadow-xl overflow-y-auto max-h-[80%]">
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setFilterPanelOpen(false)} />
+          <div className="relative w-full bg-white rounded-t-2xl shadow-xl overflow-y-auto max-h-[80%]">
             <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 sticky top-0 bg-white z-10">
               <h3 className="font-bold text-[#1B5E20] text-base">Filtros</h3>
               <div className="flex items-center gap-3">
@@ -472,7 +472,7 @@ export function MapScreen() {
       )}
 
       {showWelcomeTutorial && (
-        <div className="absolute inset-0 z-[1200] flex items-center justify-center bg-black/60 p-4">
+        <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="w-full max-w-md rounded-[28px] border border-[#C8E6C9] bg-white p-6 shadow-[0_35px_90px_rgba(15,23,42,0.35)]">
             <h2 className="text-2xl font-bold text-[#1B5E20]">¡Bienvenido a LumeApp! 🔥</h2>
             <p className="mt-2 text-sm text-slate-600">

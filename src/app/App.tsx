@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useState, createContext, useContext, useEffect, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { SplashScreen } from './components/SplashScreen';
@@ -56,7 +56,7 @@ function AnimatedRoutes({ userType }: { userType: UserType }) {
         className="min-h-screen w-full"
       >
         <Routes location={location}>
-          <Route path="/" element={<RouteWrapper>{userType ? <Navigate to={userType === 'buyer' ? '/map' : '/dashboard'} /> : <Onboarding />}</RouteWrapper>} />
+          <Route path="/" element={<RouteWrapper><Onboarding /></RouteWrapper>} />
           <Route path="/onboarding" element={<RouteWrapper><Onboarding /></RouteWrapper>} />
           <Route path="/map" element={<RouteWrapper><MapScreen /></RouteWrapper>} />
           <Route path="/seller/:id" element={<RouteWrapper><SellerProfile /></RouteWrapper>} />
@@ -202,7 +202,7 @@ export default function App() {
         <div className="min-h-screen w-full bg-[#F5F7F4] text-[#0f380f]">
           <AnimatedRoutes userType={userType} />
 
-          {userType && <ChatBotWidget />}
+          {userType && <ChatBotWidget userType={userType} />}
           {showComingSoon && <ComingSoonModal />}
         </div>
       </BrowserRouter>

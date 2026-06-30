@@ -41,65 +41,67 @@ export function StatsScreen() {
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4" style={{ WebkitOverflowScrolling: 'touch' }}>
 
-        {/* Visitas + gráfico */}
-        <div className="bg-white rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-bold text-[#1B5E20]">Visitas al perfil</h2>
-            <div className="flex items-center gap-1">
-              {cambio > 0
-                ? <TrendingUp size={18} className="text-green-600"/>
-                : <TrendingDown size={18} className="text-red-600"/>
-              }
-              <span className={`text-sm font-bold ${cambio > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {cambio > 0 ? '+' : ''}{cambio}
-              </span>
+        {/* KPI principal */}
+        <div className={`grid gap-4 ${isCamilaSession ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'}`}>
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 min-h-[240px] flex flex-col justify-between">
+            <div className="flex items-center justify-between">
+              <h2 className="font-bold text-[#1B5E20]">Visitas al perfil</h2>
+              <div className="inline-flex items-center gap-1 rounded-full bg-[#E8F5E9] px-2.5 py-1">
+                {cambio > 0
+                  ? <TrendingUp size={16} className="text-green-600"/>
+                  : <TrendingDown size={16} className="text-red-600"/>
+                }
+                <span className={`text-sm font-bold ${cambio > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {cambio > 0 ? '+' : ''}{cambio}
+                </span>
+              </div>
             </div>
 
-            {isCamilaSession && (
-              <div className="bg-white rounded-xl p-4 shadow-sm border border-[#BBDEFB]">
-                <h3 className="font-bold text-[#0D47A1] mb-1">Tendencia de Secado · Patio de Acopio</h3>
-                <p className="text-xs text-slate-500 mb-3">Historial de mediciones simuladas para Leñería Camila</p>
-                <div className="space-y-3">
-                  {dryingTrend.map(item => {
-                    const progress = Math.min((item.humidity / 30) * 100, 100);
-                    const isDry = item.humidity < 20;
-                    return (
-                      <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs text-slate-600">{item.label}</span>
-                          <span className={`text-sm font-bold ${isDry ? 'text-[#047857]' : 'text-[#B45309]'}`}>{item.humidity}%</span>
-                        </div>
-                        <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
-                          <div className={`h-full rounded-full ${isDry ? 'bg-[#10B981]' : 'bg-[#F59E0B]'}`} style={{ width: `${progress}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+            <div className="flex-1 flex flex-col items-center justify-center text-center">
+              <p className="text-6xl leading-none font-bold text-[#2E7D32]">{visitasHoy}</p>
+              <p className="mt-3 text-sm text-gray-600">visitas hoy vs {visitasAyer} ayer</p>
+            </div>
+
+            {!isCamilaSession && (
+              <div className="flex justify-between items-end h-20 gap-1.5">
+                {datosSemana.map(d => (
+                  <div key={d.dia} className="flex-1 flex flex-col items-center gap-1">
+                    <div className="w-full flex flex-col justify-end items-center" style={{ height: '54px' }}>
+                      <div
+                        className="w-full bg-[#2E7D32] rounded-t-sm transition-all"
+                        style={{ height: `${(d.visitas / maxVisitas) * 54}px` }}
+                      />
+                    </div>
+                    <span className="text-[10px] text-gray-500">{d.dia}</span>
+                  </div>
+                ))}
               </div>
             )}
           </div>
 
-          <div className="text-center mb-5">
-            <p className="text-4xl font-bold text-[#2E7D32]">{visitasHoy}</p>
-            <p className="text-sm text-gray-600 mt-1">visitas hoy</p>
-            <p className="text-xs text-gray-400 mt-0.5">vs {visitasAyer} ayer</p>
-          </div>
-
-          {/* Bar chart */}
-          <div className="flex justify-between items-end h-28 gap-1.5">
-            {datosSemana.map(d => (
-              <div key={d.dia} className="flex-1 flex flex-col items-center gap-1">
-                <div className="w-full flex flex-col justify-end items-center" style={{ height: '80px' }}>
-                  <div
-                    className="w-full bg-[#2E7D32] rounded-t-sm transition-all"
-                    style={{ height: `${(d.visitas / maxVisitas) * 80}px` }}
-                  />
-                </div>
-                <span className="text-xs text-gray-500">{d.dia}</span>
+          {isCamilaSession && (
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 min-h-[240px]">
+              <h3 className="font-bold text-[#1B5E20] mb-1">Tendencia de Secado</h3>
+              <p className="text-xs text-slate-500 mb-3">Patio de acopio · Leñería Camila</p>
+              <div className="space-y-3">
+                {dryingTrend.map(item => {
+                  const progress = Math.min((item.humidity / 30) * 100, 100);
+                  const isDry = item.humidity < 20;
+                  return (
+                    <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-slate-600">{item.label}</span>
+                        <span className={`text-sm font-bold ${isDry ? 'text-[#047857]' : 'text-[#B45309]'}`}>{item.humidity}%</span>
+                      </div>
+                      <div className="h-2 rounded-full bg-slate-200 overflow-hidden">
+                        <div className={`h-full rounded-full ${isDry ? 'bg-[#10B981]' : 'bg-[#F59E0B]'}`} style={{ width: `${progress}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Contactos + tasa */}

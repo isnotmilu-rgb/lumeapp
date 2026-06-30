@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { Bot, MessageSquare, Send, Wifi, X } from 'lucide-react';
+import { BarChart3, Bot, MessageSquare, Send, ShieldCheck, Upload, Wifi, X } from 'lucide-react';
 
 type ChatMessage = {
   id: string;
@@ -7,10 +7,16 @@ type ChatMessage = {
   text: string;
 };
 
-const QUICK_QUESTIONS = [
-  '🛒 ¿Cómo comprar?',
-  '📍 ¿Cuál está más cerca?',
-  '🪵 ¿Qué es la certificación?',
+const BUYER_QUICK_QUESTIONS = [
+  { key: 'buy', label: '🛒 ¿Cómo comprar?' },
+  { key: 'near', label: '📍 ¿Cuál está más cerca?' },
+  { key: 'cert', label: '🪵 ¿Qué es la certificación?' },
+];
+
+const VENDOR_QUICK_QUESTIONS = [
+  { key: 'publish', label: '¿Cómo publico mi leña?', icon: Upload },
+  { key: 'certify', label: '¿Cómo me certifico?', icon: ShieldCheck },
+  { key: 'sales', label: '¿Ver mis ventas?', icon: BarChart3 },
 ];
 
 const INITIAL_MESSAGE: ChatMessage = {
@@ -19,8 +25,22 @@ const INITIAL_MESSAGE: ChatMessage = {
   text: '¡Hola! Soy tu Asistente Lume AI 🤖. Te ayudo a comprar leña certificada, comparar vendedores y entender las mediciones.',
 };
 
-function buildAssistantReply(input: string): string {
+function buildAssistantReply(input: string, isVendorView: boolean): string {
   const normalized = input.toLowerCase();
+
+  if (isVendorView) {
+    if (normalized.includes('public') || normalized.includes('publico') || normalized.includes('lote')) {
+      return 'Para publicar tu leña: entra a tu dashboard, conecta el sensor ESP32, valida la lectura y presiona "Certificar y Publicar Lote". Eso actualiza el estado para compradores.';
+    }
+    if (normalized.includes('certific') || normalized.includes('sensor') || normalized.includes('humedad')) {
+      return 'La certificación se activa midiendo humedad con IoT en tiempo real. Si el lote queda bajo 20%, puedes descargar el certificado de calidad LumeApp.';
+    }
+    if (normalized.includes('venta') || normalized.includes('stats') || normalized.includes('graf')) {
+      return 'Puedes revisar tu rendimiento en Stats: historial de mediciones, tendencia de secado y actividad de compradores para tomar mejores decisiones de publicación.';
+    }
+
+    return 'Te ayudo a publicar lotes, certificar con sensor IoT y revisar métricas de ventas. Elige una acción rápida y te guío.';
+  }
 
   if (normalized.includes('cerca') || normalized.includes('mapa') || normalized.includes('ubic')) {
     return 'En el mapa puedes ver y filtrar automáticamente las leñerías activas en Temuco. Te recomiendo revisar distancia, stock y humedad para elegir la mejor opción cercana.';
@@ -37,7 +57,12 @@ function buildAssistantReply(input: string): string {
   return 'Puedo ayudarte con compra, cercanía de vendedores, certificación IoT y estado de humedad. Si quieres, te guío paso a paso.';
 }
 
-export function ChatBotWidget() {
+type ChatBotWidgetProps = {
+  userType?: 'buyer' | 'vendor' | null;
+};
+
+export function ChatBotWidget({ userType }: ChatBotWidgetProps) {
+  const isVendorView = userType === 'vendor';
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState('');
@@ -45,6 +70,7 @@ export function ChatBotWidget() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const typingTimeoutRef = useRef<number | null>(null);
   const messageCount = messages.length;
+  const quickQuestions = isVendorView ? VENDOR_QUICK_QUESTIONS : BUYER_QUICK_QUESTIONS;
 
   const canSend = useMemo(() => input.trim().length > 0 && !isTyping, [input, isTyping]);
 
@@ -73,7 +99,7 @@ export function ChatBotWidget() {
         {
           id: `assistant-${Date.now()}`,
           role: 'assistant',
-          text: buildAssistantReply(text),
+          text: buildAssistantReply(text, isVendorView),
         },
       ]);
       setIsTyping(false);
@@ -102,7 +128,7 @@ export function ChatBotWidget() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end gap-3">
       {isOpen && (
         <div className="w-[min(92vw,360px)] rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden">
           <div className="bg-[#1B5E20] px-4 py-3 text-white">
@@ -146,13 +172,20 @@ export function ChatBotWidget() {
 
           <div className="border-t border-slate-200 bg-white px-3 py-3">
             <div className="mb-3 flex flex-wrap gap-2">
-              {QUICK_QUESTIONS.map((question) => (
+              {quickQuestions.map((question) => (
                 <button
-                  key={question}
-                  onClick={() => sendMessage(question)}
+                  key={question.key}
+                  onClick={() => sendMessage(question.label)}
                   className="rounded-full border border-slate-300 bg-slate-100 px-3 py-1.5 text-xs font-medium text-slate-700 transition hover:bg-slate-200"
                 >
-                  {question}
+                  {'icon' in question && question.icon ? (
+                    <>
+                      <question.icon size={12} className="mr-1 inline" />
+                      {question.label}
+                    </>
+                  ) : (
+                    question.label
+                  )}
                 </button>
               ))}
             </div>
