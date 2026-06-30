@@ -35,6 +35,43 @@ function RouteWrapper({ children }: { children: ReactNode }) {
 
 type UserType = 'buyer' | 'vendor' | null;
 
+// Componente de rutas animadas movido afuera para evitar bucles de renderizado
+function AnimatedRoutes({ userType }: { userType: UserType }) {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait" initial={false}>
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 18 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -18 }}
+        transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+        className="min-h-screen w-full"
+      >
+        <Routes location={location}>
+          <Route path="/" element={<RouteWrapper>{userType ? <Navigate to={userType === 'buyer' ? '/map' : '/dashboard'} /> : <Onboarding />}</RouteWrapper>} />
+          <Route path="/onboarding" element={<RouteWrapper><Onboarding /></RouteWrapper>} />
+          <Route path="/map" element={<RouteWrapper><MapScreen /></RouteWrapper>} />
+          <Route path="/seller/:id" element={<RouteWrapper><SellerProfile /></RouteWrapper>} />
+          <Route path="/contact/:id" element={<RouteWrapper><ContactScreen /></RouteWrapper>} />
+          <Route path="/list" element={<RouteWrapper><ListScreen /></RouteWrapper>} />
+          <Route path="/dashboard" element={<RouteWrapper><VendorDashboard /></RouteWrapper>} />
+          <Route path="/measure" element={<RouteWrapper><MeasureScreen /></RouteWrapper>} />
+          <Route path="/confirmation" element={<RouteWrapper><ConfirmationScreen /></RouteWrapper>} />
+          <Route path="/certification" element={<RouteWrapper><CertificationScreen /></RouteWrapper>} />
+          <Route path="/history/:id" element={<RouteWrapper><HistoryScreen /></RouteWrapper>} />
+          <Route path="/profile/buyer" element={<RouteWrapper><BuyerProfileScreen /></RouteWrapper>} />
+          <Route path="/profile/vendor" element={<RouteWrapper><VendorProfileScreen /></RouteWrapper>} />
+          <Route path="/faq" element={<RouteWrapper><FAQScreen /></RouteWrapper>} />
+          <Route path="/how-it-works" element={<RouteWrapper><HowItWorksScreen /></RouteWrapper>} />
+          <Route path="/stats" element={<RouteWrapper><StatsScreen /></RouteWrapper>} />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 interface AppContextType {
   userType: UserType;
   setUserType: (type: UserType) => void;
@@ -66,7 +103,6 @@ export default function App() {
     try {
       analyticsService.trackSessionStart();
 
-      // Track session end on app close
       const handleBeforeUnload = () => {
         try {
           analyticsService.trackSessionEnd();
@@ -86,7 +122,6 @@ export default function App() {
       };
     } catch (error) {
       console.warn('Error initializing analytics:', error);
-      // Application continues even if analytics fails
     }
   }, []);
 
@@ -97,42 +132,6 @@ export default function App() {
           <SplashScreen onFinish={() => setShowSplash(false)} />
         </div>
       </div>
-    );
-  }
-
-  function AnimatedRoutes() {
-    const location = useLocation();
-
-    return (
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.div
-          key={location.pathname}
-          initial={{ opacity: 0, y: 18 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -18 }}
-          transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-          className="min-h-screen w-full"
-        >
-          <Routes location={location}>
-            <Route path="/" element={<RouteWrapper>{userType ? <Navigate to={userType === 'buyer' ? '/map' : '/dashboard'} /> : <Onboarding />}</RouteWrapper>} />
-            <Route path="/onboarding" element={<RouteWrapper><Onboarding /></RouteWrapper>} />
-            <Route path="/map" element={<RouteWrapper><MapScreen /></RouteWrapper>} />
-            <Route path="/seller/:id" element={<RouteWrapper><SellerProfile /></RouteWrapper>} />
-            <Route path="/contact/:id" element={<RouteWrapper><ContactScreen /></RouteWrapper>} />
-            <Route path="/list" element={<RouteWrapper><ListScreen /></RouteWrapper>} />
-            <Route path="/dashboard" element={<RouteWrapper><VendorDashboard /></RouteWrapper>} />
-            <Route path="/measure" element={<RouteWrapper><MeasureScreen /></RouteWrapper>} />
-            <Route path="/confirmation" element={<RouteWrapper><ConfirmationScreen /></RouteWrapper>} />
-            <Route path="/certification" element={<RouteWrapper><CertificationScreen /></RouteWrapper>} />
-            <Route path="/history/:id" element={<RouteWrapper><HistoryScreen /></RouteWrapper>} />
-            <Route path="/profile/buyer" element={<RouteWrapper><BuyerProfileScreen /></RouteWrapper>} />
-            <Route path="/profile/vendor" element={<RouteWrapper><VendorProfileScreen /></RouteWrapper>} />
-            <Route path="/faq" element={<RouteWrapper><FAQScreen /></RouteWrapper>} />
-            <Route path="/how-it-works" element={<RouteWrapper><HowItWorksScreen /></RouteWrapper>} />
-            <Route path="/stats" element={<RouteWrapper><StatsScreen /></RouteWrapper>} />
-          </Routes>
-        </motion.div>
-      </AnimatePresence>
     );
   }
 
@@ -151,7 +150,7 @@ export default function App() {
     >
       <BrowserRouter>
         <div className="min-h-screen w-full bg-[#F5F7F4] text-[#0f380f]">
-          <AnimatedRoutes />
+          <AnimatedRoutes userType={userType} />
 
           {showComingSoon && <ComingSoonModal />}
         </div>

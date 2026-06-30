@@ -100,7 +100,7 @@ export function StatsScreen() {
             <Clock size={18} className="text-[#2E7D32]"/>
             <h3 className="font-bold text-[#1B5E20]">Horario peak</h3>
           </div>
-          <p className="text-sm text-gray-600 mb-2">La mayoría de tus visitantes llegan entre:</p>
+          <p className="text-sm text-gray-600 mb-2">La mayoría de tus visitors llegan entre:</p>
           <div className="bg-[#E8F5E9] rounded-lg p-3 text-center">
             <p className="text-2xl font-bold text-[#2E7D32]">18:00 - 20:00</p>
             <p className="text-xs text-gray-500 mt-1">62% de las visitas diarias</p>
@@ -150,7 +150,7 @@ export function StatsScreen() {
       <div className="bg-white border-t border-gray-200 px-4 py-3 flex justify-around items-center flex-shrink-0">
         <button onClick={() => navigate('/dashboard')} className="flex flex-col items-center gap-1 text-gray-400"><Home size={22}/><span className="text-xs">Inicio</span></button>
         <button className="flex flex-col items-center gap-1 text-[#2E7D32]"><BarChart3 size={22}/><span className="text-xs">Stats</span></button>
-        <button onClick={() => navigate('/certification')} className="flex flex-col items-center gap-1 text-gray-400"><Shield size={22}/><span className="text-xs">Certif.</span></button>
+        <button onClick={() => navigate('/certification')} className="flex flex-col items-center gap-1 text-gray-400"><Shield size={22}/><span className="text-xs">Certificación</span></button>
         <button onClick={() => navigate('/profile/vendor')} className="flex flex-col items-center gap-1 text-gray-400"><User size={22}/><span className="text-xs">Perfil</span></button>
       </div>
     </div>

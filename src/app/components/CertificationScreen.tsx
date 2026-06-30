@@ -5,7 +5,7 @@ import { useApp } from '../App';
 
 export function CertificationScreen() {
   const navigate = useNavigate();
-  const { setShowComingSoon, setCurrentFlow, setCurrentStep } = useApp();
+  const { setCurrentFlow, setCurrentStep } = useApp();
   const [displayHumidity, setDisplayHumidity] = useState(0);
 
   const certificationData = {
@@ -200,7 +200,7 @@ export function CertificationScreen() {
           <span className="text-xs">Inicio</span>
         </button>
         <button
-          onClick={() => setShowComingSoon(true)}
+          onClick={() => navigate('/stats')}
           className="flex flex-col items-center gap-1 text-gray-400"
         >
           <BarChart3 size={24} />

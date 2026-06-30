@@ -200,6 +200,7 @@ export function VendorDashboard() {
               </p>
             </div>
 
+            {/* Competitors */}
             <div>
               <h3 className="font-bold text-[#1B5E20] mb-2 text-sm">Competidores cercanos</h3>
               <div className="space-y-2">
@@ -240,6 +241,7 @@ export function VendorDashboard() {
       <div className="bg-white border-t border-gray-200 px-4 py-3 flex justify-around items-center flex-shrink-0">
         <button className="flex flex-col items-center gap-1 text-[#2E7D32]"><Home size={22}/><span className="text-xs">Inicio</span></button>
         <button onClick={() => navigate('/stats')} className="flex flex-col items-center gap-1 text-gray-400"><BarChart3 size={22}/><span className="text-xs">Stats</span></button>
+        <button onClick={() => navigate('/certification')} className="flex flex-col items-center gap-1 text-gray-400"><Shield size={22}/><span className="text-xs">Certificación</span></button>
         <button onClick={() => navigate('/profile/vendor')} className="flex flex-col items-center gap-1 text-gray-400"><User size={22}/><span className="text-xs">Perfil</span></button>
       </div>
     </div>

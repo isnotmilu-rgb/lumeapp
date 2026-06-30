@@ -40,104 +40,104 @@ export function VendorProfileScreen() {
       <div className="flex-1 overflow-y-auto" style={{ WebkitOverflowScrolling: 'touch' }}>
         {/* Profile Header */}
         <div className="bg-white p-6 mb-2">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-[#2E7D32] flex items-center justify-center text-white text-2xl font-bold">
-            LB
-          </div>
-          <div className="flex-1">
-            <h2 className="font-bold text-lg">Leñas Boyeco</h2>
-            <p className="text-sm text-gray-600">Temuco, Chile</p>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="bg-[#2E7D32] text-white text-xs px-2 py-0.5 rounded-full">
-                ✓ Certificado
-              </span>
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 rounded-full bg-[#2E7D32] flex items-center justify-center text-white text-2xl font-bold">
+              LB
+            </div>
+            <div className="flex-1">
+              <h2 className="font-bold text-lg">Leñas Boyeco</h2>
+              <p className="text-sm text-gray-600">Temuco, Chile</p>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="bg-[#2E7D32] text-white text-xs px-2 py-0.5 rounded-full">
+                  ✓ Certificado
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Certification Status */}
-      <div className="bg-white p-4 mb-2">
-        <h3 className="font-bold text-[#1B5E20] mb-3">Estado de certificación</h3>
-        <div className="bg-[#E8F5E9] rounded-lg p-4">
-          <div className="flex justify-between items-start mb-2">
-            <span className="text-sm text-gray-700">Humedad actual</span>
-            <span className="text-2xl font-bold text-[#2E7D32]">17%</span>
+        {/* Certification Status */}
+        <div className="bg-white p-4 mb-2">
+          <h3 className="font-bold text-[#1B5E20] mb-3">Estado de certificación</h3>
+          <div className="bg-[#E8F5E9] rounded-lg p-4">
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-sm text-gray-700">Humedad actual</span>
+              <span className="text-2xl font-bold text-[#2E7D32]">17%</span>
+            </div>
+            <div className="bg-white rounded-full h-2 mb-2 overflow-hidden">
+              <div className="bg-[#2E7D32] h-full rounded-full" style={{ width: '17%' }}></div>
+            </div>
+            <p className="text-xs text-gray-600">Medido hace 1 día · Vigente 6 días más</p>
           </div>
-          <div className="bg-white rounded-full h-2 mb-2 overflow-hidden">
-            <div className="bg-[#2E7D32] h-full rounded-full" style={{ width: '17%' }}></div>
+        </div>
+
+        {/* Mi Negocio */}
+        <div className="bg-white mb-2">
+          <div className="px-4 py-3 border-b border-gray-200">
+            <h3 className="font-bold text-[#1B5E20]">Mi negocio</h3>
           </div>
-          <p className="text-xs text-gray-600">Medido hace 1 día · Vigente 6 días más</p>
+          <div className="px-4 py-3 border-b border-gray-100">
+            <p className="text-xs text-gray-500">Nombre comercial</p>
+            <p className="text-sm font-medium">Leñas Boyeco</p>
+          </div>
+          <div className="px-4 py-3 border-b border-gray-100">
+            <p className="text-xs text-gray-500">RUT</p>
+            <p className="text-sm font-medium">76.XXX.XXX-X</p>
+          </div>
+          <div className="px-4 py-3 border-b border-gray-100">
+            <p className="text-xs text-gray-500">Dirección</p>
+            <p className="text-sm font-medium">Av. Alemania 850, Temuco</p>
+          </div>
+          <MenuItem
+            icon={Store}
+            label="Editar información"
+            onClick={() => setShowComingSoon(true)}
+          />
         </div>
-      </div>
 
-      {/* Mi Negocio */}
-      <div className="bg-white mb-2">
-        <div className="px-4 py-3 border-b border-gray-200">
-          <h3 className="font-bold text-[#1B5E20]">Mi negocio</h3>
+        {/* Configuración */}
+        <div className="bg-white mb-2">
+          <div className="px-4 py-3 border-b border-gray-200">
+            <h3 className="font-bold text-[#1B5E20]">Configuración</h3>
+          </div>
+          <MenuItem
+            icon={Bell}
+            label="Notificaciones"
+            onClick={() => setShowComingSoon(true)}
+          />
+          <MenuItem
+            icon={CreditCard}
+            label="Plan actual: Básico"
+            onClick={() => setShowComingSoon(true)}
+          />
+          <MenuItem
+            icon={FileText}
+            label="Facturación"
+            onClick={() => setShowComingSoon(true)}
+          />
         </div>
-        <div className="px-4 py-3 border-b border-gray-100">
-          <p className="text-xs text-gray-500">Nombre comercial</p>
-          <p className="text-sm font-medium">Leñas Boyeco</p>
-        </div>
-        <div className="px-4 py-3 border-b border-gray-100">
-          <p className="text-xs text-gray-500">RUT</p>
-          <p className="text-sm font-medium">76.XXX.XXX-X</p>
-        </div>
-        <div className="px-4 py-3 border-b border-gray-100">
-          <p className="text-xs text-gray-500">Dirección</p>
-          <p className="text-sm font-medium">Av. Alemania 850, Temuco</p>
-        </div>
-        <MenuItem
-          icon={Store}
-          label="Editar información"
-          onClick={() => setShowComingSoon(true)}
-        />
-      </div>
 
-      {/* Configuración */}
-      <div className="bg-white mb-2">
-        <div className="px-4 py-3 border-b border-gray-200">
-          <h3 className="font-bold text-[#1B5E20]">Configuración</h3>
+        {/* Ayuda */}
+        <div className="bg-white mb-20">
+          <div className="px-4 py-3 border-b border-gray-200">
+            <h3 className="font-bold text-[#1B5E20]">Ayuda</h3>
+          </div>
+          <MenuItem
+            icon={HelpCircle}
+            label="Preguntas frecuentes del vendedor"
+            onClick={() => setShowComingSoon(true)}
+          />
+          <MenuItem
+            icon={Gauge}
+            label="Cómo funciona el dispositivo"
+            onClick={() => setShowComingSoon(true)}
+          />
+          <MenuItem
+            icon={Settings}
+            label="Contactar soporte"
+            onClick={() => setShowComingSoon(true)}
+          />
         </div>
-        <MenuItem
-          icon={Bell}
-          label="Notificaciones"
-          onClick={() => setShowComingSoon(true)}
-        />
-        <MenuItem
-          icon={CreditCard}
-          label="Plan actual: Básico"
-          onClick={() => setShowComingSoon(true)}
-        />
-        <MenuItem
-          icon={FileText}
-          label="Facturación"
-          onClick={() => setShowComingSoon(true)}
-        />
-      </div>
-
-      {/* Ayuda */}
-      <div className="bg-white mb-20">
-        <div className="px-4 py-3 border-b border-gray-200">
-          <h3 className="font-bold text-[#1B5E20]">Ayuda</h3>
-        </div>
-        <MenuItem
-          icon={HelpCircle}
-          label="Preguntas frecuentes del vendedor"
-          onClick={() => setShowComingSoon(true)}
-        />
-        <MenuItem
-          icon={Gauge}
-          label="Cómo funciona el dispositivo"
-          onClick={() => setShowComingSoon(true)}
-        />
-        <MenuItem
-          icon={Settings}
-          label="Contactar soporte"
-          onClick={() => setShowComingSoon(true)}
-        />
-      </div>
 
         {/* Logout */}
         <div className="bg-white mb-2">
@@ -164,7 +164,7 @@ export function VendorProfileScreen() {
           <span className="text-xs">Inicio</span>
         </button>
         <button
-          onClick={() => setShowComingSoon(true)}
+          onClick={() => navigate('/stats')}
           className="flex flex-col items-center gap-1 text-gray-400"
         >
           <BarChart3 size={22} />
