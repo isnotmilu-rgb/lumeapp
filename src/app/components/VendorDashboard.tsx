@@ -43,8 +43,9 @@ export function VendorDashboard() {
 
   return (
     <div style={{ height: '100dvh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }} className="bg-[#F9FBE7]">
-      <div className="bg-[#1B5E20] text-white px-4 py-2 flex justify-between items-center text-xs flex-shrink-0">
-        <span>9:41</span><span className="font-bold">LumeApp</span>
+      {/* Status Bar sin hora y centrado */}
+      <div className="bg-[#1B5E20] text-white px-4 py-2 flex justify-center items-center text-xs flex-shrink-0">
+        <span className="font-bold">LumeApp</span>
       </div>
 
       {/* Top bar with settings icon */}
