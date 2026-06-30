@@ -10,6 +10,7 @@ import { ListScreen } from './components/ListScreen';
 import { VendorDashboard } from './components/VendorDashboard';
 import { MeasureScreen } from './components/MeasureScreen';
 import { ConfirmationScreen } from './components/ConfirmationScreen';
+import { CheckoutScreen } from './components/CheckoutScreen';
 import { CertificationScreen } from './components/CertificationScreen';
 import { HistoryScreen } from './components/HistoryScreen';
 import { BuyerProfileScreen } from './components/BuyerProfileScreen';
@@ -18,6 +19,7 @@ import { FAQScreen } from './components/FAQScreen';
 import { HowItWorksScreen } from './components/HowItWorksScreen';
 import { StatsScreen } from './components/StatsScreen';
 import { ComingSoonModal } from './components/ComingSoonModal';
+import { ChatBotWidget } from './components/ChatBotWidget';
 import { analyticsService } from '../services/analytics';
 
 // Analytics route tracker
@@ -34,6 +36,10 @@ function RouteWrapper({ children }: { children: ReactNode }) {
 }
 
 type UserType = 'buyer' | 'vendor' | null;
+
+const buyerFlow = ['Seleccionar "Soy comprador"', 'Iniciar sesión o crear cuenta', 'Verificar acceso', 'Ver mapa de vendedores', 'Comprar leña certificada'];
+const vendorFlow = ['Seleccionar "Soy vendedor"', 'Iniciar sesión o crear cuenta', 'Verificar acceso', 'Ver dashboard', 'Gestionar certificación activa'];
+const DEMO_USER_TYPE_STORAGE_KEY = 'lume_demo_user_type';
 
 // Componente de rutas animadas movido afuera para evitar bucles de renderizado
 function AnimatedRoutes({ userType }: { userType: UserType }) {
@@ -59,6 +65,7 @@ function AnimatedRoutes({ userType }: { userType: UserType }) {
           <Route path="/dashboard" element={<RouteWrapper><VendorDashboard /></RouteWrapper>} />
           <Route path="/measure" element={<RouteWrapper><MeasureScreen /></RouteWrapper>} />
           <Route path="/confirmation" element={<RouteWrapper><ConfirmationScreen /></RouteWrapper>} />
+          <Route path="/checkout" element={<RouteWrapper><CheckoutScreen /></RouteWrapper>} />
           <Route path="/certification" element={<RouteWrapper><CertificationScreen /></RouteWrapper>} />
           <Route path="/history/:id" element={<RouteWrapper><HistoryScreen /></RouteWrapper>} />
           <Route path="/profile/buyer" element={<RouteWrapper><BuyerProfileScreen /></RouteWrapper>} />
@@ -97,6 +104,23 @@ export default function App() {
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [currentFlow, setCurrentFlow] = useState<string[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
+  const [isAuthReady, setIsAuthReady] = useState(false);
+
+  const applyUserRole = (role: UserType) => {
+    setUserType(role);
+    if (role === 'buyer') {
+      setCurrentFlow(buyerFlow);
+      setCurrentStep(1);
+      return;
+    }
+    if (role === 'vendor') {
+      setCurrentFlow(vendorFlow);
+      setCurrentStep(1);
+      return;
+    }
+    setCurrentFlow([]);
+    setCurrentStep(0);
+  };
 
   // Initialize analytics on app start
   useEffect(() => {
@@ -125,12 +149,38 @@ export default function App() {
     }
   }, []);
 
+  useEffect(() => {
+    const storedRole = window.localStorage.getItem(DEMO_USER_TYPE_STORAGE_KEY);
+    if (storedRole === 'buyer' || storedRole === 'vendor') {
+      applyUserRole(storedRole);
+    } else {
+      applyUserRole(null);
+    }
+    setIsAuthReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (userType) {
+      window.localStorage.setItem(DEMO_USER_TYPE_STORAGE_KEY, userType);
+      return;
+    }
+    window.localStorage.removeItem(DEMO_USER_TYPE_STORAGE_KEY);
+  }, [userType]);
+
   if (showSplash) {
     return (
       <div className="min-h-screen w-full bg-gradient-to-br from-[#0d3d11] to-[#1B5E20] flex items-center justify-center">
         <div className="w-full min-h-screen bg-[#F9FBE7]">
           <SplashScreen onFinish={() => setShowSplash(false)} />
         </div>
+      </div>
+    );
+  }
+
+  if (!isAuthReady) {
+    return (
+      <div className="min-h-screen w-full bg-gradient-to-br from-[#0d3d11] to-[#1B5E20] flex items-center justify-center">
+        <div className="h-12 w-12 rounded-full border-4 border-[#A5D6A7] border-t-transparent animate-spin" />
       </div>
     );
   }
@@ -152,6 +202,7 @@ export default function App() {
         <div className="min-h-screen w-full bg-[#F5F7F4] text-[#0f380f]">
           <AnimatedRoutes userType={userType} />
 
+          {userType && <ChatBotWidget />}
           {showComingSoon && <ComingSoonModal />}
         </div>
       </BrowserRouter>

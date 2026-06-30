@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, SlidersHorizontal, X, Check } from 'lucide-react';
+import { Search, SlidersHorizontal, X, Check, MapPin, Layers, ShieldCheck } from 'lucide-react';
 import { useApp } from '../App';
 import { MapView } from './MapView';
 import { BottomNavigation } from './BottomNavigation';
@@ -51,6 +51,7 @@ export function MapScreen() {
   const navigate = useNavigate();
   const { setCurrentFlow, setCurrentStep } = useApp();
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
+  const [showWelcomeTutorial, setShowWelcomeTutorial] = useState(false);
   const [filtros, setFiltros] = useState<Filtros>({ search: '', species: [], zones: [], precioMax: 60000, soloCertificados: false });
   const [tempFiltros, setTempFiltros] = useState<Filtros>(filtros);
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
@@ -95,6 +96,18 @@ export function MapScreen() {
     return () => window.clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    const tutorialSeen = window.localStorage.getItem('lume_tutorial_visto');
+    if (!tutorialSeen) {
+      setShowWelcomeTutorial(true);
+    }
+  }, []);
+
+  const closeWelcomeTutorial = () => {
+    window.localStorage.setItem('lume_tutorial_visto', 'true');
+    setShowWelcomeTutorial(false);
+  };
+
   const chips = [...filtros.species, ...filtros.zones, ...(filtros.soloCertificados ? ['Solo certif.'] : []), ...(filtros.precioMax !== 60000 ? [`Hasta $${(filtros.precioMax/1000).toFixed(0)}k`] : [])];
 
   const removeChip = (chip: string) => setFiltros(p => ({ ...p, species: p.species.filter(s => s !== chip), zones: p.zones.filter(z => z !== chip), soloCertificados: chip === 'Solo certif.' ? false : p.soloCertificados, ...(chip.startsWith('Hasta') ? { precioMax: 60000 } : {}) }));
@@ -125,10 +138,9 @@ export function MapScreen() {
 
   return (
     <div className="min-h-screen flex flex-col relative w-full bg-[#F0F7F0]">
-      {/* Header */}
+      {/* Header sin hora y centrado */}
       <div className="bg-gradient-to-r from-[#1B5E20] to-[#2E7D32] text-white px-4 py-3 flex-shrink-0 shadow-[0_20px_60px_rgba(15,23,42,0.18)]">
-        <div className="flex items-center justify-between mb-1">
-          <span className="text-xs opacity-90">9:41</span>
+        <div className="flex items-center justify-center mb-1">
           <span className="font-bold text-sm">LumeApp</span>
         </div>
         <div className="text-center">
@@ -201,8 +213,8 @@ export function MapScreen() {
                 analyticsService.trackMapInteraction('marker_click', { markerId, markerType: 'user_location' });
                 return;
               }
-              const numericId = typeof markerId === 'string' ? Number(markerId) : markerId;
-              const v = vendors.find(x => x.id === numericId);
+              const markerKey = String(markerId);
+              const v = vendors.find(x => String(x.id) === markerKey);
               if (v) {
                 setSelectedVendor(v);
                 analyticsService.trackVendorInteraction(v.id.toString(), 'marker_clicked', { name: v.name, certified: v.certified, humidity: v.humidity, price: v.price });
@@ -455,6 +467,51 @@ export function MapScreen() {
             <div className="px-4 pb-8 pt-2">
               <button onClick={applyFilters} className="w-full bg-[#2E7D32] text-white py-3 rounded-xl font-medium text-sm hover:bg-[#1B5E20] transition-colors">Aplicar filtros</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showWelcomeTutorial && (
+        <div className="absolute inset-0 z-[1200] flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-md rounded-[28px] border border-[#C8E6C9] bg-white p-6 shadow-[0_35px_90px_rgba(15,23,42,0.35)]">
+            <h2 className="text-2xl font-bold text-[#1B5E20]">¡Bienvenido a LumeApp! 🔥</h2>
+            <p className="mt-2 text-sm text-slate-600">
+              Comprar leña certificada y de calidad es muy fácil. Sigue estos 3 pasos:
+            </p>
+
+            <div className="mt-5 space-y-3">
+              <div className="rounded-2xl border border-[#E8F5E9] bg-[#F5FBF5] p-4">
+                <div className="flex items-start gap-3">
+                  <MapPin size={20} className="mt-0.5 text-[#2E7D32]" />
+                  <p className="text-sm text-slate-700">
+                    <span className="font-semibold text-[#1B5E20]">Encuentra:</span> Explora el mapa y selecciona un vendedor cerca de ti.
+                  </p>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-[#E8F5E9] bg-[#F5FBF5] p-4">
+                <div className="flex items-start gap-3">
+                  <Layers size={20} className="mt-0.5 text-[#2E7D32]" />
+                  <p className="text-sm text-slate-700">
+                    <span className="font-semibold text-[#1B5E20]">Calcula:</span> Entra a su perfil y elige cuántos metros cúbicos (m³) necesitas.
+                  </p>
+                </div>
+              </div>
+              <div className="rounded-2xl border border-[#E8F5E9] bg-[#F5FBF5] p-4">
+                <div className="flex items-start gap-3">
+                  <ShieldCheck size={20} className="mt-0.5 text-[#2E7D32]" />
+                  <p className="text-sm text-slate-700">
+                    <span className="font-semibold text-[#1B5E20]">Paga Seguro:</span> Confirma tu pedido y paga al instante con Flow y Webpay Plus.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={closeWelcomeTutorial}
+              className="mt-6 w-full rounded-xl bg-[#2E7D32] py-3 text-sm font-bold text-white transition hover:bg-[#1B5E20]"
+            >
+              ¡Entendido, vamos a comprar!
+            </button>
           </div>
         </div>
       )}

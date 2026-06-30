@@ -7,6 +7,7 @@ export function VendorProfileScreen() {
   const { setShowComingSoon, setUserType } = useApp();
 
   const handleLogout = () => {
+    window.localStorage.removeItem('lume_demo_identity');
     setUserType(null);
     navigate('/onboarding');
   };

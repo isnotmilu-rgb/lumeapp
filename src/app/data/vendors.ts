@@ -7,7 +7,7 @@ export type WoodOption = {
 };
 
 export type Vendor = {
-  id: number;
+  id: number | 'vendedor_camila';
   name: string;
   initials: string;
   humidity: number | null;
@@ -206,6 +206,30 @@ export const vendors: Vendor[] = [
       { name: 'Coihue', imageUrl: 'https://i.imgur.com/OhvLQ4A.jpeg', price: 46000, available: 10, humidity: 22 },
       { name: 'Roble', imageUrl: 'https://i.imgur.com/wTYaseS.jpeg', price: 48000, available: 8, humidity: 23 },
       { name: 'Laurel', imageUrl: 'https://i.imgur.com/NxqTEbu.jpeg', price: 50000, available: 5, humidity: 20 },
+    ],
+  },
+  {
+    id: 'vendedor_camila',
+    name: 'Leñería Camila (Sensor en Vivo) 🔥',
+    initials: 'LC',
+    humidity: 18,
+    certified: true,
+    species: 'Eucaliptus',
+    available: 11,
+    price: 47000,
+    address: 'Av. Pablo Neruda 01390, Temuco',
+    rating: 4.9,
+    reviews: 12,
+    daysAgo: 0,
+    distance: 1.4,
+    zone: 'temuco',
+    lat: -38.7397,
+    lng: -72.5988,
+    heroImage: 'https://i.imgur.com/8FYaFaF.png',
+    imageUrl: 'https://images.unsplash.com/photo-1519682577862-22b62b24e493?auto=format&fit=crop&w=1200&q=80',
+    woods: [
+      { name: 'Eucaliptus', imageUrl: 'https://i.imgur.com/9X0Oa6E.png', price: 47000, available: 11, humidity: 18 },
+      { name: 'Roble', imageUrl: 'https://i.imgur.com/wTYaseS.jpeg', price: 50000, available: 8, humidity: 19 },
     ],
   },
 ];
