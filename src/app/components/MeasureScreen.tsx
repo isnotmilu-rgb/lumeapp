@@ -90,7 +90,8 @@ export function MeasureScreen() {
     const applyRealtimeHumidity = (
       humidityValue: unknown,
       readingTimestamp?: string,
-      record?: { id_medicion?: string | number; id?: string | number; created_at?: string; valor_humedad?: unknown; vendedor_id?: string | number }
+      record?: { id_medicion?: string | number; id?: string | number; created_at?: string; valor_humedad?: unknown; vendedor_id?: string | number },
+      source: 'realtime' | 'poll' = 'realtime'
     ) => {
       const parsedHumidity = typeof humidityValue === 'number' ? humidityValue : Number(humidityValue);
       if (Number.isNaN(parsedHumidity)) {
@@ -116,38 +117,40 @@ export function MeasureScreen() {
       if (alreadyExistsInRef) {
         return;
       }
-      if (contentKey && processedContentKeysRef.current.has(contentKey)) {
-        return;
-      }
-      const uniqueKey = getMeasurementUniqueKey(record);
-      if (uniqueKey) {
-        if (processedMeasurementIdsRef.current.has(uniqueKey)) {
+      if (source === 'realtime') {
+        if (contentKey && processedContentKeysRef.current.has(contentKey)) {
           return;
         }
-        processedMeasurementIdsRef.current.add(uniqueKey);
-        if (contentKey) {
-          processedContentKeysRef.current.add(contentKey);
-        }
-        setProcessedMeasurements(prev => {
-          const exists = prev.some(item => {
-            const itemAny = item as unknown as { id_medicion?: string | number; id?: string | number };
-            return (
-              item.uniqueKey === uniqueKey ||
-              createContentKey(item) === contentKey ||
-              (idMedicion !== undefined && itemAny.id_medicion === idMedicion) ||
-              (id !== undefined && itemAny.id === id)
-            );
+        const uniqueKey = getMeasurementUniqueKey(record);
+        if (uniqueKey) {
+          if (processedMeasurementIdsRef.current.has(uniqueKey)) {
+            return;
+          }
+          processedMeasurementIdsRef.current.add(uniqueKey);
+          if (contentKey) {
+            processedContentKeysRef.current.add(contentKey);
+          }
+          setProcessedMeasurements(prev => {
+            const exists = prev.some(item => {
+              const itemAny = item as unknown as { id_medicion?: string | number; id?: string | number };
+              return (
+                item.uniqueKey === uniqueKey ||
+                createContentKey(item) === contentKey ||
+                (idMedicion !== undefined && itemAny.id_medicion === idMedicion) ||
+                (id !== undefined && itemAny.id === id)
+              );
+            });
+            if (exists) return prev;
+            return [{
+              uniqueKey,
+              created_at: readingTimestamp ?? '',
+              valor_humedad: parsedHumidity,
+              vendedor_id: String(record?.vendedor_id ?? '1'),
+              id: id,
+              id_medicion: idMedicion,
+            }, ...prev];
           });
-          if (exists) return prev;
-          return [{
-            uniqueKey,
-            created_at: readingTimestamp ?? '',
-            valor_humedad: parsedHumidity,
-            vendedor_id: String(record?.vendedor_id ?? '1'),
-            id: id,
-            id_medicion: idMedicion,
-          }, ...prev];
-        });
+        }
       }
       if (readingTimestamp && readingTimestamp === lastAppliedReadingRef.current) {
         return;
@@ -193,7 +196,7 @@ export function MeasureScreen() {
           id: data[0]?.id,
           created_at: data[0]?.created_at,
           valor_humedad: data[0]?.valor_humedad,
-        });
+        }, 'poll');
       } catch (error) {
         if (!isMounted) return;
         setIotLoading(false);
@@ -226,7 +229,7 @@ export function MeasureScreen() {
           const newRecord = payload.new;
           console.log('¡Dato Realtime recibido!', newRecord);
           console.log('DEBUG LUMEAPP - Registro recibido:', newRecord);
-          applyRealtimeHumidity(newRecord?.valor_humedad, newRecord?.created_at, newRecord);
+          applyRealtimeHumidity(newRecord?.valor_humedad, newRecord?.created_at, newRecord, 'realtime');
         }
       )
       .subscribe();
