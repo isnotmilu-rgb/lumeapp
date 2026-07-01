@@ -255,9 +255,10 @@ export function SellerProfile() {
       uniqueMeasurementsForRender.push(item as { valor_humedad: number; created_at: string; id_medicion?: string | number; id?: string | number });
     }
   });
+  const historyListForTimeline = uniqueMeasurementsForRender.slice(1);
 
   const timelineMeasurements = isCamilaLiveVendor
-    ? uniqueMeasurementsForRender.map((measurement) => {
+    ? historyListForTimeline.map((measurement) => {
         const measurementDate = new Date(measurement.created_at);
         return {
           key: measurement.created_at,
