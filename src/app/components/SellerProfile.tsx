@@ -33,10 +33,12 @@ export function SellerProfile() {
   const { id } = useParams<{ id: string }>();
   const { setCurrentStep, userType } = useApp();
   const sessionIdentity = window.localStorage.getItem('lume_demo_identity');
+  const persistedUserType = window.localStorage.getItem('lume_demo_user_type');
   const vendor = vendors.find(vendor => String(vendor.id) === String(id));
   const isCamilaVendorProfile = id === 'vendedor_camila';
   const isCamilaOwnerSession = sessionIdentity === 'vendedor_camila' && userType === 'vendor';
-  const shouldShowLiveSensor = isCamilaVendorProfile && isCamilaOwnerSession;
+  const isBuyerContext = userType === 'buyer' || persistedUserType === 'buyer';
+  const shouldShowLiveSensor = isCamilaVendorProfile && isCamilaOwnerSession && !isBuyerContext;
   const realtimeSourceVendorId = String(vendor?.id ?? id ?? '') === 'vendedor_camila' ? '1' : String(vendor?.id ?? id ?? '');
   const [selectedMeters, setSelectedMeters] = useState(1);
   const woodTypes = vendor?.woods.map(wood => wood.name) ?? ['Eucaliptus', 'Roble', 'Coigüe'];
