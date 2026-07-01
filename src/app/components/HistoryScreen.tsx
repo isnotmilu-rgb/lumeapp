@@ -76,6 +76,9 @@ type HistoryMeasurement = {
   id_medicion?: string | number;
   created_at?: string;
   vendedor_id?: string;
+  tipo_madera?: string;
+  tipo_lena?: string;
+  wood_type?: string;
 };
 
 export function HistoryScreen() {
@@ -91,7 +94,7 @@ export function HistoryScreen() {
   const [camilaMeasurements, setCamilaMeasurements] = useState<HistoryMeasurement[]>([]);
   const [camilaLoading, setCamilaLoading] = useState(false);
   const [camilaError, setCamilaError] = useState('');
-  const latestPublishedWoodType = window.localStorage.getItem('lume_camila_published_wood_type');
+  const woodMap = JSON.parse(window.localStorage.getItem('lume_wood_id_map') || '{}') as Record<string, string>;
 
   useEffect(() => {
     if (!isCamilaVendor || !realtimeSourceVendorId) return;
@@ -142,6 +145,9 @@ export function HistoryScreen() {
             id_medicion: measurement?.id_medicion,
             created_at: measurement?.created_at,
             vendedor_id: typeof measurement?.vendedor_id === 'string' ? measurement.vendedor_id : realtimeSourceVendorId,
+            tipo_madera: typeof measurement?.tipo_madera === 'string' ? measurement.tipo_madera : undefined,
+            tipo_lena: typeof measurement?.tipo_lena === 'string' ? measurement.tipo_lena : undefined,
+            wood_type: typeof measurement?.wood_type === 'string' ? measurement.wood_type : undefined,
           } as HistoryMeasurement;
         })
         .filter((measurement): measurement is HistoryMeasurement => measurement !== null);
@@ -164,6 +170,7 @@ export function HistoryScreen() {
             status: 'Vigente',
             created_at: storedPublishedAt,
             vendedor_id: realtimeSourceVendorId,
+            tipo_madera: storedPublishedWoodType || undefined,
           });
         }
       }
@@ -290,7 +297,7 @@ export function HistoryScreen() {
               {camilaError}
             </div>
           )}
-          {historyListForTimeline.map((measurement, index) => (
+          {historyListForTimeline.map((measurement) => (
             <div
               key={measurement.key}
               className={`rounded-[24px] border p-4 ${measurement.status === 'Vigente' ? 'border-[#2E7D32] bg-[#F0FFF4]' : 'border-slate-200 bg-white'}`}
@@ -308,7 +315,18 @@ export function HistoryScreen() {
                 <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-3xl font-semibold text-[#2E7D32]">{measurement.humidity}%</p>
-                    <p className="text-sm text-slate-500">{index === 0 ? (latestPublishedWoodType || measurement.species || 'Coigüe') : (measurement.species || 'Eucaliptus')}</p>
+                    <p className="text-sm text-slate-500">
+                      {(() => {
+                        const itemKey = measurement.id_medicion || measurement.id || measurement.created_at || measurement.key;
+                        const woodTypeToDisplay =
+                          woodMap[String(itemKey)]
+                          || measurement.tipo_madera
+                          || measurement.tipo_lena
+                          || measurement.wood_type
+                          || 'Eucaliptus';
+                        return woodTypeToDisplay;
+                      })()}
+                    </p>
                   </div>
                   <div className="h-2.5 w-full rounded-full bg-slate-100 overflow-hidden sm:max-w-[280px]">
                     <div

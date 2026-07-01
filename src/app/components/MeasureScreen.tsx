@@ -267,9 +267,14 @@ export function MeasureScreen() {
       window.setTimeout(() => {
         setShowCertificateModal(true);
         setIotFlowState('success');
+        const publishedAt = new Date().toISOString();
         window.localStorage.setItem('lume_camila_published_humidity', iotHumidity.toString());
-        window.localStorage.setItem('lume_camila_published_at', new Date().toISOString());
+        window.localStorage.setItem('lume_camila_published_at', publishedAt);
         window.localStorage.setItem('lume_camila_published_wood_type', selectedWoodType);
+        const currentMap = JSON.parse(window.localStorage.getItem('lume_wood_id_map') || '{}') as Record<string, string>;
+        const recordKey = publishedAt;
+        currentMap[recordKey] = selectedWoodType;
+        window.localStorage.setItem('lume_wood_id_map', JSON.stringify(currentMap));
       }, 450);
     }, 700);
   };

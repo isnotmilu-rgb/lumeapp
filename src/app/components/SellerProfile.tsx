@@ -271,7 +271,7 @@ export function SellerProfile() {
       status: (vendor.humidity !== null ? vendor.humidity + 2 : 26) <= 20 ? 'Óptimo' : 'Aceptable',
     },
   ];
-  const latestPublishedWoodType = window.localStorage.getItem('lume_camila_published_wood_type');
+  const woodMap = JSON.parse(window.localStorage.getItem('lume_wood_id_map') || '{}') as Record<string, string>;
   const uniqueMeasurementsForRender: Array<{
     valor_humedad: number;
     created_at: string;
@@ -305,11 +305,15 @@ export function SellerProfile() {
     : uniqueMeasurementsForRender;
 
   const timelineMeasurements = isCamilaVendorProfile
-    ? historyListForTimeline.map((measurement, index) => {
+    ? historyListForTimeline.map((measurement) => {
         const measurementDate = new Date(measurement.created_at);
-        const woodTypeToDisplay = index === 0
-          ? (latestPublishedWoodType || measurement.tipo_madera || measurement.tipo_lena || measurement.wood_type || 'Coigüe')
-          : (measurement.tipo_madera || measurement.tipo_lena || measurement.wood_type || 'Eucaliptus');
+        const itemKey = measurement.id_medicion || measurement.id || measurement.created_at;
+        const woodTypeToDisplay =
+          (itemKey ? woodMap[String(itemKey)] : undefined)
+          || measurement.tipo_madera
+          || measurement.tipo_lena
+          || measurement.wood_type
+          || 'Eucaliptus';
         return {
           key: measurement.created_at,
           created_at: measurement.created_at,
