@@ -137,32 +137,33 @@ export function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0d3d11] via-[#1B5E20] to-[#2E7D32] px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-green-800 via-green-900 to-green-950 px-4 py-8">
       <div className="mx-auto w-full max-w-md px-6">
         <div className="mx-auto flex w-full flex-col">
-          <div className="mb-8 flex flex-col items-center pt-4">
-          <div
-            style={{
-              width: '88px',
-              height: '88px',
-              borderRadius: '22px',
-              overflow: 'hidden',
-              boxShadow: '0 0 30px rgba(165,214,167,0.35), 0 6px 20px rgba(0,0,0,0.4)',
-              marginBottom: '16px',
-            }}
-          >
-            <img src={LOGO_URL} alt="LumeApp" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-          <h1 className="text-3xl font-extrabold tracking-wide text-white">LumeApp</h1>
-          <p className="mt-1 text-xs uppercase tracking-[0.2em] text-[#A5D6A7]">Acceso seguro</p>
-          </div>
-
           {currentView === 'role' && (
-            <div className="space-y-4">
-              <p className="text-center text-sm font-semibold text-white/95">Selecciona cómo quieres acceder</p>
+            <div className="rounded-2xl bg-white p-8 shadow-xl">
+              <div className="mb-6 flex flex-col items-center text-center">
+                <div
+                  style={{
+                    width: '88px',
+                    height: '88px',
+                    borderRadius: '22px',
+                    overflow: 'hidden',
+                    boxShadow: '0 12px 24px rgba(15, 23, 42, 0.18)',
+                    marginBottom: '16px',
+                  }}
+                >
+                  <img src={LOGO_URL} alt="LumeApp" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <h1 className="text-3xl font-extrabold tracking-wide text-green-900">LumeApp</h1>
+                <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-500">Acceso seguro</p>
+              </div>
+
+              <p className="text-center text-sm font-semibold text-slate-700 mb-4">Selecciona cómo quieres acceder</p>
+              <div className="space-y-4">
               <button
                 onClick={() => handleRoleSelect('buyer')}
-                className="w-full rounded-2xl bg-white p-5 text-[#1B5E20] shadow-lg transition-all active:scale-95"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 p-5 text-[#1B5E20] shadow-sm transition-all hover:bg-slate-100 active:scale-95"
               >
                 <div className="flex items-center gap-4">
                   <ShoppingBag size={38} strokeWidth={1.5} className="flex-shrink-0" />
@@ -175,7 +176,7 @@ export function Onboarding() {
 
               <button
                 onClick={() => handleRoleSelect('vendor')}
-                className="w-full rounded-2xl bg-white p-5 text-[#1B5E20] shadow-lg transition-all active:scale-95"
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 p-5 text-[#1B5E20] shadow-sm transition-all hover:bg-slate-100 active:scale-95"
               >
                 <div className="flex items-center gap-4">
                   <Store size={38} strokeWidth={1.5} className="flex-shrink-0" />
@@ -185,11 +186,29 @@ export function Onboarding() {
                   </div>
                 </div>
               </button>
+              </div>
             </div>
           )}
 
           {currentView !== 'role' && (
-            <div className="rounded-3xl bg-white p-6 shadow-[0_28px_80px_rgba(0,0,0,0.25)]">
+            <>
+              <div className="mb-8 flex flex-col items-center pt-4">
+                <div
+                  style={{
+                    width: '88px',
+                    height: '88px',
+                    borderRadius: '22px',
+                    overflow: 'hidden',
+                    boxShadow: '0 0 30px rgba(165,214,167,0.35), 0 6px 20px rgba(0,0,0,0.4)',
+                    marginBottom: '16px',
+                  }}
+                >
+                  <img src={LOGO_URL} alt="LumeApp" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </div>
+                <h1 className="text-3xl font-extrabold tracking-wide text-white">LumeApp</h1>
+                <p className="mt-1 text-xs uppercase tracking-[0.2em] text-[#A5D6A7]">Acceso seguro</p>
+              </div>
+              <div className="rounded-3xl bg-white p-6 shadow-[0_28px_80px_rgba(0,0,0,0.25)]">
               {renderAuthHeader()}
 
             {currentView === 'login' && (
@@ -370,6 +389,7 @@ export function Onboarding() {
               </button>
             </div>
             </div>
+            </>
           )}
 
           <p className="mt-8 text-center text-xs text-white/45">

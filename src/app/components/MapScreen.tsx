@@ -50,6 +50,8 @@ interface Filtros { search: string; species: string[]; zones: string[]; precioMa
 export function MapScreen() {
   const navigate = useNavigate();
   const { setCurrentFlow, setCurrentStep } = useApp();
+  const sessionIdentity = window.localStorage.getItem('lume_demo_identity') || 'buyer';
+  const tutorialSeenStorageKey = `lume_tutorial_visto_${sessionIdentity}`;
   const [filterPanelOpen, setFilterPanelOpen] = useState(false);
   const [showWelcomeTutorial, setShowWelcomeTutorial] = useState(false);
   const [filtros, setFiltros] = useState<Filtros>({ search: '', species: [], zones: [], precioMax: 60000, soloCertificados: false });
@@ -97,14 +99,14 @@ export function MapScreen() {
   }, []);
 
   useEffect(() => {
-    const tutorialSeen = window.localStorage.getItem('lume_tutorial_visto');
+    const tutorialSeen = window.localStorage.getItem(tutorialSeenStorageKey);
     if (!tutorialSeen) {
       setShowWelcomeTutorial(true);
     }
-  }, []);
+  }, [tutorialSeenStorageKey]);
 
   const closeWelcomeTutorial = () => {
-    window.localStorage.setItem('lume_tutorial_visto', 'true');
+    window.localStorage.setItem(tutorialSeenStorageKey, 'true');
     setShowWelcomeTutorial(false);
   };
 
