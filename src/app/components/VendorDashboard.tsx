@@ -71,7 +71,6 @@ export function VendorDashboard() {
   useEffect(() => {
     if (iotFlowState !== 'preview' || !isCamilaSession || !connectionTime) return;
     let isMounted = true;
-    const connectionTimestamp = new Date(connectionTime).getTime();
 
     const applyRealtimeHumidity = (humidityValue: unknown) => {
       const parsedHumidity = typeof humidityValue === 'number' ? humidityValue : Number(humidityValue);
@@ -138,13 +137,7 @@ export function VendorDashboard() {
         },
         (payload: { new?: { vendedor_id?: string; valor_humedad?: unknown; created_at?: string } }) => {
           if (!isMounted) return;
-          const createdAt = payload.new?.created_at;
-          if (typeof createdAt === 'string') {
-            const createdAtTimestamp = new Date(createdAt).getTime();
-            if (!Number.isNaN(createdAtTimestamp) && createdAtTimestamp < connectionTimestamp) {
-              return;
-            }
-          }
+          console.log('¡Dato Realtime recibido!', payload.new);
           applyRealtimeHumidity(payload.new?.valor_humedad);
         }
       )
