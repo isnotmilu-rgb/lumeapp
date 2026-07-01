@@ -134,7 +134,7 @@ export function VendorDashboard() {
           event: 'INSERT',
           schema: 'public',
           table: 'mediciones_humedad',
-          filter: 'vendedor_id=eq.vendedor_camila',
+          filter: 'vendedor_id=eq.1',
         },
         (payload: { new?: { vendedor_id?: string; valor_humedad?: unknown; created_at?: string } }) => {
           if (!isMounted) return;
