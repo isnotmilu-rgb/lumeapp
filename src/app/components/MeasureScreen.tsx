@@ -63,6 +63,17 @@ export function MeasureScreen() {
   const uniqueMeasurementsForRender = Array.from(
     new Map(processedMeasurements.map(item => [createContentKey(item), item])).values()
   );
+  const activeMeasurementContentKey =
+    iotHumidity === null
+      ? ''
+      : createContentKey({
+          valor_humedad: iotHumidity,
+          vendedor_id: '1',
+          created_at: lastAppliedReadingRef.current,
+        });
+  const historyMeasurementsForRender = uniqueMeasurementsForRender.filter(
+    (measurement) => createContentKey(measurement) !== activeMeasurementContentKey
+  );
 
   useEffect(() => {
     hasValidHumidityReadingRef.current = hasValidHumidityReading;
@@ -438,11 +449,11 @@ export function MeasureScreen() {
                   <p className="mt-2 text-xs text-[#1B5E20]/75">Publicado: {new Date(publishedAt).toLocaleString('es-CL')}</p>
                 )}
 
-                {uniqueMeasurementsForRender.length > 0 && (
+                {historyMeasurementsForRender.length > 0 && (
                   <div className="mt-3 rounded-lg border border-[#BBDEFB] bg-[#F8FBFF] p-3">
                     <p className="text-xs font-semibold text-[#0D47A1] mb-2">Lecturas recientes (sin duplicados)</p>
                     <div className="space-y-2">
-                      {uniqueMeasurementsForRender.map((measurement) => (
+                      {historyMeasurementsForRender.map((measurement) => (
                         <div key={measurement.uniqueKey} className="flex items-center justify-between rounded-md bg-white px-3 py-2 border border-[#E3F2FD]">
                           <span className="text-xs text-slate-600">
                             {measurement.created_at ? new Date(measurement.created_at).toLocaleString('es-CL') : 'Sin timestamp'}
