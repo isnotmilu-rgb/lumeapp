@@ -475,10 +475,18 @@ export function MapScreen() {
 
       {showWelcomeTutorial && (
         <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-[28px] border border-[#C8E6C9] bg-white p-6 shadow-[0_35px_90px_rgba(15,23,42,0.35)]">
-            <h2 className="text-2xl font-bold text-[#1B5E20]">¡Bienvenido a LumeApp! 🔥</h2>
+          <div className="relative w-full max-w-md rounded-[28px] border border-[#C8E6C9] bg-white p-6 shadow-[0_35px_90px_rgba(15,23,42,0.35)]">
+            <button
+              onClick={closeWelcomeTutorial}
+              className="absolute right-4 top-4 rounded-full p-1 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+              aria-label="Cerrar guía de cómo comprar"
+            >
+              <X size={18} />
+            </button>
+
+            <h2 className="text-2xl font-bold text-[#1B5E20]">Cómo funciona LumeApp</h2>
             <p className="mt-2 text-sm text-slate-600">
-              Comprar leña certificada y de calidad es muy fácil. Sigue estos 3 pasos:
+              Comprar leña certificada y de calidad es muy fácil. Sigue estos 3 pasos simples:
             </p>
 
             <div className="mt-5 space-y-3">
