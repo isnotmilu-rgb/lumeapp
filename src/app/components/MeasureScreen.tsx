@@ -224,12 +224,10 @@ export function MeasureScreen() {
           table: 'mediciones_humedad',
           filter: 'vendedor_id=eq.1',
         },
-        (payload: { new?: { id_medicion?: string | number; id?: string | number; vendedor_id?: string; valor_humedad?: unknown; created_at?: string } }) => {
+        () => {
           if (!isMounted) return;
-          const newRecord = payload.new;
-          console.log('¡Dato Realtime recibido!', newRecord);
-          console.log('DEBUG LUMEAPP - Registro recibido:', newRecord);
-          applyRealtimeHumidity(newRecord?.valor_humedad, newRecord?.created_at, newRecord, 'realtime');
+          // Al detectar una nueva medición, re-consultamos la base de datos para reflejar el estado real y limpio.
+          void fetchHumidity();
         }
       )
       .subscribe();
