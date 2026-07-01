@@ -308,7 +308,7 @@ export function HistoryScreen() {
                 <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-3xl font-semibold text-[#2E7D32]">{measurement.humidity}%</p>
-                    <p className="text-sm text-slate-500">{index === 0 ? (latestPublishedWoodType || measurement.species || 'Coigüe') : (measurement.species || 'Coigüe')}</p>
+                    <p className="text-sm text-slate-500">{index === 0 ? (latestPublishedWoodType || measurement.species || 'Coigüe') : (measurement.species || 'Eucaliptus')}</p>
                   </div>
                   <div className="h-2.5 w-full rounded-full bg-slate-100 overflow-hidden sm:max-w-[280px]">
                     <div

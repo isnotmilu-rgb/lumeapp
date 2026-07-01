@@ -307,13 +307,16 @@ export function SellerProfile() {
   const timelineMeasurements = isCamilaVendorProfile
     ? historyListForTimeline.map((measurement, index) => {
         const measurementDate = new Date(measurement.created_at);
+        const woodTypeToDisplay = index === 0
+          ? (latestPublishedWoodType || measurement.tipo_madera || measurement.tipo_lena || measurement.wood_type || 'Coigüe')
+          : (measurement.tipo_madera || measurement.tipo_lena || measurement.wood_type || 'Eucaliptus');
         return {
           key: measurement.created_at,
+          created_at: measurement.created_at,
+          id: measurement.id,
+          id_medicion: measurement.id_medicion,
           humidity: measurement.valor_humedad,
-          woodType:
-            !shouldShowLiveSensor && index === 0
-              ? latestPublishedWoodType || measurement.tipo_madera || measurement.tipo_lena || measurement.wood_type || 'Coigüe'
-              : measurement.tipo_madera || measurement.tipo_lena || measurement.wood_type || 'Coigüe',
+          woodType: woodTypeToDisplay,
           date: measurementDate.toLocaleDateString('es-CL', {
             day: '2-digit',
             month: 'short',
@@ -332,6 +335,25 @@ export function SellerProfile() {
         date: measurement.date,
         time: measurement.time,
       }));
+  const finalDeduplicatedTimeline: Array<{
+    key: string;
+    created_at?: string;
+    id?: string | number;
+    id_medicion?: string | number;
+    humidity: number;
+    woodType: string;
+    date: string;
+    time: string;
+  }> = [];
+  const seenTimelineIds = new Set<string | number>();
+
+  (timelineMeasurements || []).forEach((item) => {
+    const key = item.id_medicion || item.id || item.created_at || item.key;
+    if (key && !seenTimelineIds.has(key)) {
+      seenTimelineIds.add(key);
+      finalDeduplicatedTimeline.push(item);
+    }
+  });
 
   return (
     <div className="bg-[#F5F7F4] text-slate-900 pb-28">
@@ -539,13 +561,13 @@ export function SellerProfile() {
                 </div>
               )}
 
-              {isCamilaVendorProfile && timelineMeasurements.length === 0 ? (
+              {isCamilaVendorProfile && finalDeduplicatedTimeline.length === 0 ? (
                 <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-5 py-6 text-sm text-slate-600">
                   Este vendedor aún no registra un historial de mediciones certificadas.
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {timelineMeasurements.map((measurement, index) => {
+                  {finalDeduplicatedTimeline.map((measurement, index) => {
                     const isDry = measurement.humidity < 20;
                     return (
                       <div key={measurement.key} className="rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm">
@@ -568,7 +590,7 @@ export function SellerProfile() {
                         <p className="mt-1 text-xs text-slate-500">
                           {measurement.woodType || 'Eucaliptus'}
                         </p>
-                        {index < timelineMeasurements.length - 1 && <div className="mt-3 h-px bg-slate-100" />}
+                        {index < finalDeduplicatedTimeline.length - 1 && <div className="mt-3 h-px bg-slate-100" />}
                       </div>
                     );
                   })}
