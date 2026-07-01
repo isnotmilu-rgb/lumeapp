@@ -266,6 +266,7 @@ export function SellerProfile() {
       status: (vendor.humidity !== null ? vendor.humidity + 2 : 26) <= 20 ? 'Óptimo' : 'Aceptable',
     },
   ];
+  const latestPublishedWoodType = window.localStorage.getItem('lume_camila_published_wood_type');
   const uniqueMeasurementsForRender: Array<{
     valor_humedad: number;
     created_at: string;
@@ -283,18 +284,28 @@ export function SellerProfile() {
       || item.created_at;
     if (uniqueKey && !seenIds.has(uniqueKey)) {
       seenIds.add(uniqueKey);
-      uniqueMeasurementsForRender.push(item as { valor_humedad: number; created_at: string; id_medicion?: string | number; id?: string | number });
+      uniqueMeasurementsForRender.push(item as {
+        valor_humedad: number;
+        created_at: string;
+        tipo_madera?: string;
+        tipo_lena?: string;
+        wood_type?: string;
+        id_medicion?: string | number;
+        id?: string | number;
+      });
     }
   });
   const historyListForTimeline = uniqueMeasurementsForRender.slice(1);
 
   const timelineMeasurements = isCamilaLiveVendor
-    ? historyListForTimeline.map((measurement) => {
+    ? historyListForTimeline.map((measurement, index) => {
         const measurementDate = new Date(measurement.created_at);
         return {
           key: measurement.created_at,
           humidity: measurement.valor_humedad,
-          woodType: measurement.tipo_madera || measurement.tipo_lena || measurement.wood_type || 'Eucaliptus',
+          woodType: index === 0
+            ? latestPublishedWoodType || measurement.tipo_madera || measurement.tipo_lena || measurement.wood_type || 'Eucaliptus'
+            : measurement.tipo_madera || measurement.tipo_lena || measurement.wood_type || 'Eucaliptus',
           date: measurementDate.toLocaleDateString('es-CL', {
             day: '2-digit',
             month: 'short',

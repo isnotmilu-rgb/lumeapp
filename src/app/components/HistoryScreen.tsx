@@ -87,6 +87,7 @@ export function HistoryScreen() {
   const [camilaMeasurements, setCamilaMeasurements] = useState<HistoryMeasurement[]>([]);
   const [camilaLoading, setCamilaLoading] = useState(false);
   const [camilaError, setCamilaError] = useState('');
+  const latestPublishedWoodType = window.localStorage.getItem('lume_camila_published_wood_type');
 
   useEffect(() => {
     if (!isCamilaVendor || !realtimeSourceVendorId) return;
@@ -179,6 +180,19 @@ export function HistoryScreen() {
         verified: measurement.verified,
         status: measurement.status as 'Vigente' | 'Expirada',
       }));
+  const uniqueMeasurementsForRender: HistoryMeasurement[] = [];
+  const seenIds = new Set<string | number>();
+
+  (renderedMeasurements || []).forEach((item) => {
+    const uniqueKey = (item as { id_medicion?: string | number; id?: string | number; key?: string }).id_medicion
+      || (item as { id?: string | number; key?: string }).id
+      || item.key;
+    if (uniqueKey && !seenIds.has(uniqueKey)) {
+      seenIds.add(uniqueKey);
+      uniqueMeasurementsForRender.push(item);
+    }
+  });
+  const historyListForTimeline = isCamilaVendor ? uniqueMeasurementsForRender.slice(1) : uniqueMeasurementsForRender;
 
   if (!vendor) return (
     <div className="min-h-screen flex flex-col items-center justify-center">
@@ -238,17 +252,17 @@ export function HistoryScreen() {
               <h2 className="text-xl font-semibold text-slate-900">Todas las mediciones</h2>
               <p className="mt-1 text-sm text-slate-500">Revisa el historial completo de humedad y certificados.</p>
             </div>
-          <span className="rounded-full bg-[#E8F5E9] px-3 py-2 text-xs font-semibold text-[#1B5E20]">{renderedMeasurements.length} entradas</span>
+          <span className="rounded-full bg-[#E8F5E9] px-3 py-2 text-xs font-semibold text-[#1B5E20]">{historyListForTimeline.length} entradas</span>
           </div>
 
           <div className="mt-5 space-y-4">
-          {isCamilaVendor && camilaLoading && renderedMeasurements.length === 0 && (
+          {isCamilaVendor && camilaLoading && historyListForTimeline.length === 0 && (
             <div className="rounded-[24px] border border-[#BBDEFB] bg-[#E3F2FD] p-4 text-sm text-[#0D47A1] inline-flex items-center gap-2">
               <Loader2 size={16} className="animate-spin" />
               Cargando historial en vivo...
             </div>
           )}
-          {isCamilaVendor && !camilaLoading && renderedMeasurements.length === 0 && !camilaError && (
+          {isCamilaVendor && !camilaLoading && historyListForTimeline.length === 0 && !camilaError && (
             <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
               Este vendedor aún no registra un historial de mediciones certificadas.
             </div>
@@ -258,7 +272,7 @@ export function HistoryScreen() {
               {camilaError}
             </div>
           )}
-          {renderedMeasurements.map((measurement) => (
+          {historyListForTimeline.map((measurement, index) => (
             <div
               key={measurement.key}
               className={`rounded-[24px] border p-4 ${measurement.status === 'Vigente' ? 'border-[#2E7D32] bg-[#F0FFF4]' : 'border-slate-200 bg-white'}`}
@@ -276,7 +290,7 @@ export function HistoryScreen() {
                 <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-3xl font-semibold text-[#2E7D32]">{measurement.humidity}%</p>
-                    <p className="text-sm text-slate-500">{measurement.species}</p>
+                    <p className="text-sm text-slate-500">{index === 0 ? (latestPublishedWoodType || measurement.species || 'Eucaliptus') : (measurement.species || 'Eucaliptus')}</p>
                   </div>
                   <div className="h-2.5 w-full rounded-full bg-slate-100 overflow-hidden sm:max-w-[280px]">
                     <div
