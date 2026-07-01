@@ -9,6 +9,7 @@ export function MeasureScreen() {
   const navigate = useNavigate();
   const [selectedWoodType, setSelectedWoodType] = useState('');
   const [showIotPanel, setShowIotPanel] = useState(false);
+  const [processedMeasurements, setProcessedMeasurements] = useState<Array<{ id: string }>>([]);
   const [iotHumidity, setIotHumidity] = useState<number | null>(null);
   const [iotLoading, setIotLoading] = useState(false);
   const [iotError, setIotError] = useState('');
@@ -20,6 +21,7 @@ export function MeasureScreen() {
   const hasValidHumidityReadingRef = useRef(false);
   const publishInFlightRef = useRef(false);
   const lastAppliedReadingRef = useRef('');
+  const processedMeasurementIdsRef = useRef<Set<string>>(new Set());
 
   const publishedAt = window.localStorage.getItem('lume_camila_published_at');
   const todayLabel = new Date().toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -63,7 +65,7 @@ export function MeasureScreen() {
     if (iotFlowState !== 'preview' || !connectionTime || !showIotPanel) return;
     let isMounted = true;
 
-    const applyRealtimeHumidity = (humidityValue: unknown, readingTimestamp?: string) => {
+    const applyRealtimeHumidity = (humidityValue: unknown, readingTimestamp?: string, readingId?: string | number) => {
       const parsedHumidity = typeof humidityValue === 'number' ? humidityValue : Number(humidityValue);
       if (Number.isNaN(parsedHumidity)) {
         setIotError('La lectura recibida no tiene un formato válido.');
@@ -71,6 +73,16 @@ export function MeasureScreen() {
       }
       if (parsedHumidity <= 0) {
         return;
+      }
+      if (readingId !== undefined && readingId !== null) {
+        const normalizedId = String(readingId);
+        if (processedMeasurementIdsRef.current.has(normalizedId)) {
+          return;
+        }
+        processedMeasurementIdsRef.current.add(normalizedId);
+        setProcessedMeasurements(prev =>
+          prev.some(item => item.id === normalizedId) ? prev : [...prev, { id: normalizedId }]
+        );
       }
       if (readingTimestamp && readingTimestamp === lastAppliedReadingRef.current) {
         return;
@@ -91,7 +103,7 @@ export function MeasureScreen() {
       try {
         const { data, error } = await supabase
           .from('mediciones_humedad')
-          .select('valor_humedad, created_at')
+          .select('id, valor_humedad, created_at')
           .eq('vendedor_id', '1')
           .gte('created_at', connectionTime)
           .order('created_at', { ascending: false })
@@ -111,7 +123,7 @@ export function MeasureScreen() {
           return;
         }
 
-        applyRealtimeHumidity(data[0]?.valor_humedad, data[0]?.created_at);
+        applyRealtimeHumidity(data[0]?.valor_humedad, data[0]?.created_at, data[0]?.id);
       } catch (error) {
         if (!isMounted) return;
         setIotLoading(false);
@@ -124,8 +136,8 @@ export function MeasureScreen() {
     const intervalId = window.setInterval(() => {
       void fetchHumidity();
     }, 2000);
-    const realtimeChannel = supabase
-      .channel(`mediciones-humedad-camila-${connectionTime}`)
+    const channel = supabase
+      .channel(`measure-screen-mediciones-humedad-${connectionTime}`)
       .on(
         'postgres_changes',
         {
@@ -134,10 +146,10 @@ export function MeasureScreen() {
           table: 'mediciones_humedad',
           filter: 'vendedor_id=eq.1',
         },
-        (payload: { new?: { vendedor_id?: string; valor_humedad?: unknown; created_at?: string } }) => {
+        (payload: { new?: { id?: string | number; vendedor_id?: string; valor_humedad?: unknown; created_at?: string } }) => {
           if (!isMounted) return;
           console.log('¡Dato Realtime recibido!', payload.new);
-          applyRealtimeHumidity(payload.new?.valor_humedad, payload.new?.created_at);
+          applyRealtimeHumidity(payload.new?.valor_humedad, payload.new?.created_at, payload.new?.id);
         }
       )
       .subscribe();
@@ -145,7 +157,7 @@ export function MeasureScreen() {
     return () => {
       isMounted = false;
       window.clearInterval(intervalId);
-      void supabase.removeChannel(realtimeChannel);
+      void supabase.removeChannel(channel);
     };
   }, [iotFlowState, connectionTime, showIotPanel]);
 
@@ -169,6 +181,8 @@ export function MeasureScreen() {
   const handleResetMeasurement = () => {
     publishInFlightRef.current = false;
     lastAppliedReadingRef.current = '';
+    processedMeasurementIdsRef.current = new Set();
+    setProcessedMeasurements([]);
     setIotFlowState('idle');
     setIotHumidity(null);
     setIotError('');
