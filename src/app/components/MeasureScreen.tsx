@@ -269,6 +269,7 @@ export function MeasureScreen() {
         setIotFlowState('success');
         window.localStorage.setItem('lume_camila_published_humidity', iotHumidity.toString());
         window.localStorage.setItem('lume_camila_published_at', new Date().toISOString());
+        window.localStorage.setItem('lume_camila_published_wood_type', selectedWoodType);
       }, 450);
     }, 700);
   };

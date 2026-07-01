@@ -70,7 +70,15 @@ export function SellerProfile() {
   const [liveLoading, setLiveLoading] = useState(false);
   const [liveError, setLiveError] = useState('');
   const [publishedHumidity, setPublishedHumidity] = useState<number | null>(null);
-  const [measurementHistory, setMeasurementHistory] = useState<Array<{ valor_humedad: number; created_at: string }>>([]);
+  const [measurementHistory, setMeasurementHistory] = useState<Array<{
+    valor_humedad: number;
+    created_at: string;
+    tipo_madera?: string;
+    tipo_lena?: string;
+    wood_type?: string;
+    id?: string | number;
+    id_medicion?: string | number;
+  }>>([]);
 
   const startCheckout = (quantity: number) => {
     setCurrentStep(4);
@@ -127,7 +135,7 @@ export function SellerProfile() {
       }
       const { data, error } = await supabase
         .from('mediciones_humedad')
-        .select('valor_humedad, created_at')
+        .select('*')
         .eq('vendedor_id', realtimeSourceVendorId)
         .order('created_at', { ascending: false })
         .limit(5);
@@ -149,17 +157,32 @@ export function SellerProfile() {
           return {
             valor_humedad: humidityValue,
             created_at: item.created_at,
+            tipo_madera: typeof item?.tipo_madera === 'string' ? item.tipo_madera : undefined,
+            tipo_lena: typeof item?.tipo_lena === 'string' ? item.tipo_lena : undefined,
+            wood_type: typeof item?.wood_type === 'string' ? item.wood_type : undefined,
+            id: item?.id,
+            id_medicion: item?.id_medicion,
           };
         })
-        .filter((item): item is { valor_humedad: number; created_at: string } => item !== null);
+        .filter((item): item is {
+          valor_humedad: number;
+          created_at: string;
+          tipo_madera?: string;
+          tipo_lena?: string;
+          wood_type?: string;
+          id?: string | number;
+          id_medicion?: string | number;
+        } => item !== null);
       const storedPublishedHumidity = window.localStorage.getItem('lume_camila_published_humidity');
       const storedPublishedAt = window.localStorage.getItem('lume_camila_published_at');
+      const storedPublishedWoodType = window.localStorage.getItem('lume_camila_published_wood_type');
       const parsedPublishedHumidity = storedPublishedHumidity !== null ? Number(storedPublishedHumidity) : NaN;
       const mergedHistory = [...parsedHistory];
       if (!Number.isNaN(parsedPublishedHumidity) && typeof storedPublishedAt === 'string') {
         mergedHistory.push({
           valor_humedad: parsedPublishedHumidity,
           created_at: storedPublishedAt,
+          tipo_madera: storedPublishedWoodType ?? undefined,
         });
       }
       mergedHistory.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
@@ -243,7 +266,15 @@ export function SellerProfile() {
       status: (vendor.humidity !== null ? vendor.humidity + 2 : 26) <= 20 ? 'Óptimo' : 'Aceptable',
     },
   ];
-  const uniqueMeasurementsForRender: Array<{ valor_humedad: number; created_at: string; id_medicion?: string | number; id?: string | number }> = [];
+  const uniqueMeasurementsForRender: Array<{
+    valor_humedad: number;
+    created_at: string;
+    tipo_madera?: string;
+    tipo_lena?: string;
+    wood_type?: string;
+    id_medicion?: string | number;
+    id?: string | number;
+  }> = [];
   const seenIds = new Set<string | number>();
 
   (measurementHistory || []).forEach((item) => {
@@ -263,6 +294,7 @@ export function SellerProfile() {
         return {
           key: measurement.created_at,
           humidity: measurement.valor_humedad,
+          woodType: measurement.tipo_madera || measurement.tipo_lena || measurement.wood_type || 'Eucaliptus',
           date: measurementDate.toLocaleDateString('es-CL', {
             day: '2-digit',
             month: 'short',
@@ -277,6 +309,7 @@ export function SellerProfile() {
     : measurements.map((measurement, index) => ({
         key: `${measurement.date}-${measurement.time}-${index}`,
         humidity: measurement.humidity,
+        woodType: 'Eucaliptus',
         date: measurement.date,
         time: measurement.time,
       }));
@@ -512,6 +545,9 @@ export function SellerProfile() {
                         </div>
                         <p className="mt-2 text-xs text-slate-500">
                           {measurement.date} · {measurement.time}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          {measurement.woodType || 'Eucaliptus'}
                         </p>
                         {index < timelineMeasurements.length - 1 && <div className="mt-3 h-px bg-slate-100" />}
                       </div>
