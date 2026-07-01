@@ -271,74 +271,7 @@ export function SellerProfile() {
       status: (vendor.humidity !== null ? vendor.humidity + 2 : 26) <= 20 ? 'Óptimo' : 'Aceptable',
     },
   ];
-  const woodMap = JSON.parse(window.localStorage.getItem('lume_wood_id_map') || '{}') as Record<string, string>;
-  const uniqueMeasurementsForRender: Array<{
-    valor_humedad: number;
-    created_at: string;
-    tipo_madera?: string;
-    tipo_lena?: string;
-    wood_type?: string;
-    id_medicion?: string | number;
-    id?: string | number;
-  }> = [];
-  const seenIds = new Set<string | number>();
-
-  (measurementHistory || []).forEach((item) => {
-    const uniqueKey = (item as { id_medicion?: string | number; id?: string | number; created_at?: string }).id_medicion
-      || (item as { id?: string | number; created_at?: string }).id
-      || item.created_at;
-    if (uniqueKey && !seenIds.has(uniqueKey)) {
-      seenIds.add(uniqueKey);
-      uniqueMeasurementsForRender.push(item as {
-        valor_humedad: number;
-        created_at: string;
-        tipo_madera?: string;
-        tipo_lena?: string;
-        wood_type?: string;
-        id_medicion?: string | number;
-        id?: string | number;
-      });
-    }
-  });
-  const historyListForTimeline = shouldShowLiveSensor
-    ? uniqueMeasurementsForRender.slice(1)
-    : uniqueMeasurementsForRender;
-
-  const timelineMeasurements = isCamilaVendorProfile
-    ? historyListForTimeline.map((measurement) => {
-        const measurementDate = new Date(measurement.created_at);
-        const itemKey = measurement.id_medicion || measurement.id || measurement.created_at;
-        const woodTypeToDisplay =
-          (itemKey ? woodMap[String(itemKey)] : undefined)
-          || measurement.tipo_madera
-          || measurement.tipo_lena
-          || measurement.wood_type
-          || 'Eucaliptus';
-        return {
-          key: measurement.created_at,
-          created_at: measurement.created_at,
-          id: measurement.id,
-          id_medicion: measurement.id_medicion,
-          humidity: measurement.valor_humedad,
-          woodType: woodTypeToDisplay,
-          date: measurementDate.toLocaleDateString('es-CL', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-          }),
-          time: measurementDate.toLocaleTimeString('es-CL', {
-            hour: '2-digit',
-            minute: '2-digit',
-          }),
-        };
-      })
-    : measurements.map((measurement, index) => ({
-        key: `${measurement.date}-${measurement.time}-${index}`,
-        humidity: measurement.humidity,
-        woodType: 'Coigüe',
-        date: measurement.date,
-        time: measurement.time,
-      }));
+  // 1. Inicializamos el colador y el mapa de maderas memorizadas
   const finalDeduplicatedTimeline: Array<{
     key: string;
     created_at?: string;
@@ -349,15 +282,57 @@ export function SellerProfile() {
     date: string;
     time: string;
   }> = [];
-  const seenTimelineIds = new Set<string | number>();
+  const seenContentKeys = new Set<string>();
+  const woodMap = JSON.parse(window.localStorage.getItem('lume_wood_id_map') || '{}') as Record<string, string>;
 
-  (timelineMeasurements || []).forEach((item) => {
-    const key = item.id_medicion || item.id || item.created_at || item.key;
-    if (key && !seenTimelineIds.has(key)) {
-      seenTimelineIds.add(key);
-      finalDeduplicatedTimeline.push(item);
-    }
-  });
+  if (isCamilaVendorProfile) {
+    (measurementHistory || []).forEach((item) => {
+      if (!item) return;
+
+      // Clave de contenido (Humedad + Minuto) para fundir el duplicado local con el de Supabase
+      const timeString = item.created_at ? new Date(item.created_at).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16);
+      const contentKey = `${item.valor_humedad || ''}-${timeString}`;
+
+      if (!seenContentKeys.has(contentKey)) {
+        seenContentKeys.add(contentKey);
+
+        // Recuperamos la madera específica que le corresponde a este ID único en el diccionario
+        const itemKey = item.id_medicion || item.id || item.created_at;
+        const savedWood = (itemKey ? woodMap[String(itemKey)] : undefined) || item.tipo_madera || item.tipo_lena || item.wood_type || 'Eucaliptus';
+
+        // Guardamos el objeto inyectándole su propia madera empaquetada
+        const measurementDate = new Date(item.created_at);
+        finalDeduplicatedTimeline.push({
+          key: item.created_at,
+          created_at: item.created_at,
+          id: item.id,
+          id_medicion: item.id_medicion,
+          humidity: item.valor_humedad,
+          woodType: savedWood,
+          date: measurementDate.toLocaleDateString('es-CL', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          }),
+          time: measurementDate.toLocaleTimeString('es-CL', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+        });
+      }
+    });
+  } else {
+    measurements.forEach((measurement, index) => {
+      finalDeduplicatedTimeline.push({
+        key: `${measurement.date}-${measurement.time}-${index}`,
+        humidity: measurement.humidity,
+        woodType: 'Eucaliptus',
+        date: measurement.date,
+        time: measurement.time,
+      });
+    });
+  }
+  const timelineListForRender = shouldShowLiveSensor ? finalDeduplicatedTimeline.slice(1) : finalDeduplicatedTimeline;
 
   return (
     <div className="bg-[#F5F7F4] text-slate-900 pb-28">
@@ -565,13 +540,13 @@ export function SellerProfile() {
                 </div>
               )}
 
-              {isCamilaVendorProfile && finalDeduplicatedTimeline.length === 0 ? (
+              {isCamilaVendorProfile && timelineListForRender.length === 0 ? (
                 <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-5 py-6 text-sm text-slate-600">
                   Este vendedor aún no registra un historial de mediciones certificadas.
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {finalDeduplicatedTimeline.map((measurement, index) => {
+                  {timelineListForRender.map((measurement, index) => {
                     const isDry = measurement.humidity < 20;
                     return (
                       <div key={measurement.key} className="rounded-[18px] border border-slate-200 bg-white p-4 shadow-sm">
@@ -594,7 +569,7 @@ export function SellerProfile() {
                         <p className="mt-1 text-xs text-slate-500">
                           {measurement.woodType || 'Eucaliptus'}
                         </p>
-                        {index < finalDeduplicatedTimeline.length - 1 && <div className="mt-3 h-px bg-slate-100" />}
+                        {index < timelineListForRender.length - 1 && <div className="mt-3 h-px bg-slate-100" />}
                       </div>
                     );
                   })}
