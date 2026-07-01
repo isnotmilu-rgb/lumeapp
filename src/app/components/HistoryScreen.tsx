@@ -82,13 +82,14 @@ export function HistoryScreen() {
   const idNum = Number(resolvedVendorId);
   const isCamilaVendor = resolvedVendorId === 'vendedor_camila';
   const vendor = vendors.find(v => String(v.id) === resolvedVendorId);
+  const realtimeSourceVendorId = String(vendor?.id ?? resolvedVendorId) === 'vendedor_camila' ? '1' : String(vendor?.id ?? resolvedVendorId);
   const history = Number.isNaN(idNum) ? undefined : vendorHistory[idNum as keyof typeof vendorHistory];
   const [camilaMeasurements, setCamilaMeasurements] = useState<HistoryMeasurement[]>([]);
   const [camilaLoading, setCamilaLoading] = useState(false);
   const [camilaError, setCamilaError] = useState('');
 
   useEffect(() => {
-    if (!isCamilaVendor) return;
+    if (!isCamilaVendor || !realtimeSourceVendorId) return;
     let isMounted = true;
 
     const fetchCamilaHistory = async () => {
@@ -99,7 +100,7 @@ export function HistoryScreen() {
       const { data, error } = await supabase
         .from('mediciones_humedad')
         .select('valor_humedad, created_at')
-        .eq('vendedor_id', '1')
+        .eq('vendedor_id', realtimeSourceVendorId)
         .order('created_at', { ascending: false })
         .limit(25);
 
@@ -132,7 +133,27 @@ export function HistoryScreen() {
         })
         .filter((measurement): measurement is HistoryMeasurement => measurement !== null);
 
-      setCamilaMeasurements(mappedMeasurements);
+      const storedPublishedHumidity = window.localStorage.getItem('lume_camila_published_humidity');
+      const storedPublishedAt = window.localStorage.getItem('lume_camila_published_at');
+      const parsedPublishedHumidity = storedPublishedHumidity !== null ? Number(storedPublishedHumidity) : NaN;
+      const mergedMeasurements = [...mappedMeasurements];
+      if (!Number.isNaN(parsedPublishedHumidity) && typeof storedPublishedAt === 'string') {
+        const publishedDate = new Date(storedPublishedAt);
+        if (!Number.isNaN(publishedDate.getTime())) {
+          mergedMeasurements.push({
+            key: storedPublishedAt,
+            date: publishedDate.toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' }),
+            time: publishedDate.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
+            humidity: parsedPublishedHumidity,
+            species: 'Eucaliptus',
+            verified: true,
+            status: 'Vigente',
+          });
+        }
+      }
+      mergedMeasurements.sort((a, b) => new Date(b.key).getTime() - new Date(a.key).getTime());
+
+      setCamilaMeasurements(mergedMeasurements);
       setCamilaError('');
     };
 
@@ -145,7 +166,7 @@ export function HistoryScreen() {
       isMounted = false;
       window.clearInterval(interval);
     };
-  }, [isCamilaVendor]);
+  }, [isCamilaVendor, realtimeSourceVendorId]);
 
   const renderedMeasurements: HistoryMeasurement[] = isCamilaVendor
     ? camilaMeasurements

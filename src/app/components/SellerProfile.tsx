@@ -34,6 +34,7 @@ export function SellerProfile() {
   const { setCurrentStep, userType } = useApp();
   const vendor = vendors.find(vendor => String(vendor.id) === String(id));
   const isCamilaLiveVendor = id === 'vendedor_camila' && userType === 'buyer';
+  const realtimeSourceVendorId = String(vendor?.id ?? id ?? '') === 'vendedor_camila' ? '1' : String(vendor?.id ?? id ?? '');
   const [selectedMeters, setSelectedMeters] = useState(1);
   const woodTypes = vendor?.woods.map(wood => wood.name) ?? ['Eucaliptus', 'Roble', 'Coigüe'];
   const [selectedWood, setSelectedWood] = useState<string>(vendor?.woods?.[0]?.name ?? woodTypes[0]);
@@ -127,7 +128,7 @@ export function SellerProfile() {
       const { data, error } = await supabase
         .from('mediciones_humedad')
         .select('valor_humedad, created_at')
-        .eq('vendedor_id', '1')
+        .eq('vendedor_id', realtimeSourceVendorId)
         .order('created_at', { ascending: false })
         .limit(5);
 
@@ -151,10 +152,21 @@ export function SellerProfile() {
           };
         })
         .filter((item): item is { valor_humedad: number; created_at: string } => item !== null);
+      const storedPublishedHumidity = window.localStorage.getItem('lume_camila_published_humidity');
+      const storedPublishedAt = window.localStorage.getItem('lume_camila_published_at');
+      const parsedPublishedHumidity = storedPublishedHumidity !== null ? Number(storedPublishedHumidity) : NaN;
+      const mergedHistory = [...parsedHistory];
+      if (!Number.isNaN(parsedPublishedHumidity) && typeof storedPublishedAt === 'string') {
+        mergedHistory.push({
+          valor_humedad: parsedPublishedHumidity,
+          created_at: storedPublishedAt,
+        });
+      }
+      mergedHistory.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-      setMeasurementHistory(parsedHistory);
+      setMeasurementHistory(mergedHistory);
       setLiveError('');
-      setLiveHumidity(parsedHistory.length > 0 ? parsedHistory[0].valor_humedad : null);
+      setLiveHumidity(mergedHistory.length > 0 ? mergedHistory[0].valor_humedad : null);
     };
 
     void fetchLatestCamilaMeasurement();
@@ -166,7 +178,7 @@ export function SellerProfile() {
       isMounted = false;
       window.clearInterval(interval);
     };
-  }, [isCamilaLiveVendor]);
+  }, [isCamilaLiveVendor, realtimeSourceVendorId]);
 
   if (!vendor) {
     return (
