@@ -138,8 +138,8 @@ export function Onboarding() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0d3d11] via-[#1B5E20] to-[#2E7D32] px-4 py-8">
-      <div className="mx-auto w-full max-w-4xl">
-        <div className="mx-auto flex w-full max-w-[430px] flex-col">
+      <div className="mx-auto w-full max-w-md px-6">
+        <div className="mx-auto flex w-full flex-col">
           <div className="mb-8 flex flex-col items-center pt-4">
           <div
             style={{
