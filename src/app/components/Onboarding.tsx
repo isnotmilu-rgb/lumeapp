@@ -137,11 +137,11 @@ export function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-800 via-green-900 to-green-950 px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-green-800 via-green-900 to-green-950 px-4 py-8 flex items-center justify-center">
       <div className="mx-auto w-full max-w-md px-6">
-        <div className="mx-auto flex w-full flex-col">
+        <div className="mx-auto flex w-full flex-col rounded-2xl bg-white p-8 shadow-xl md:p-10">
           {currentView === 'role' && (
-            <div className="rounded-2xl bg-white p-8 shadow-xl">
+            <>
               <div className="mb-6 flex flex-col items-center text-center">
                 <div
                   style={{
@@ -159,7 +159,7 @@ export function Onboarding() {
                 <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-500">Acceso seguro</p>
               </div>
 
-              <p className="text-center text-sm font-semibold text-slate-700 mb-4">Selecciona cómo quieres acceder</p>
+              <p className="mb-4 text-center text-sm font-semibold text-slate-700">Selecciona cómo quieres acceder</p>
               <div className="space-y-4">
               <button
                 onClick={() => handleRoleSelect('buyer')}
@@ -187,28 +187,28 @@ export function Onboarding() {
                 </div>
               </button>
               </div>
-            </div>
+            </>
           )}
 
           {currentView !== 'role' && (
             <>
-              <div className="mb-8 flex flex-col items-center pt-4">
+              <div className="mb-8 flex flex-col items-center">
                 <div
                   style={{
                     width: '88px',
                     height: '88px',
                     borderRadius: '22px',
                     overflow: 'hidden',
-                    boxShadow: '0 0 30px rgba(165,214,167,0.35), 0 6px 20px rgba(0,0,0,0.4)',
+                    boxShadow: '0 12px 24px rgba(15, 23, 42, 0.18)',
                     marginBottom: '16px',
                   }}
                 >
                   <img src={LOGO_URL} alt="LumeApp" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
-                <h1 className="text-3xl font-extrabold tracking-wide text-white">LumeApp</h1>
-                <p className="mt-1 text-xs uppercase tracking-[0.2em] text-[#A5D6A7]">Acceso seguro</p>
+                <h1 className="text-3xl font-extrabold tracking-wide text-green-900">LumeApp</h1>
+                <p className="mt-1 text-xs uppercase tracking-[0.2em] text-slate-500">Acceso seguro</p>
               </div>
-              <div className="rounded-3xl bg-white p-6 shadow-[0_28px_80px_rgba(0,0,0,0.25)]">
+
               {renderAuthHeader()}
 
             {currentView === 'login' && (
@@ -388,11 +388,10 @@ export function Onboarding() {
                 Cambiar rol
               </button>
             </div>
-            </div>
             </>
           )}
 
-          <p className="mt-8 text-center text-xs text-white/45">
+          <p className="mt-8 text-center text-xs text-slate-500">
             Certificación bajo Norma NCh 2965 · Dispositivo IoT
           </p>
         </div>
