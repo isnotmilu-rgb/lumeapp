@@ -127,7 +127,7 @@ export function SellerProfile() {
       const { data, error } = await supabase
         .from('mediciones_humedad')
         .select('valor_humedad, created_at')
-        .eq('vendedor_id', 'vendedor_camila')
+        .eq('vendedor_id', '1')
         .order('created_at', { ascending: false })
         .limit(5);
 
