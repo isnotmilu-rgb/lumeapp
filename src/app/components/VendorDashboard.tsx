@@ -71,6 +71,19 @@ export function VendorDashboard() {
   useEffect(() => {
     if (iotFlowState !== 'preview' || !isCamilaSession || !connectionTime) return;
     let isMounted = true;
+    const connectionTimestamp = new Date(connectionTime).getTime();
+
+    const applyRealtimeHumidity = (humidityValue: unknown) => {
+      const parsedHumidity = typeof humidityValue === 'number' ? humidityValue : Number(humidityValue);
+      if (Number.isNaN(parsedHumidity)) {
+        setIotError('La lectura recibida no tiene un formato válido.');
+        setIotHumidity(null);
+        return;
+      }
+      setIotHumidity(parsedHumidity);
+      setIotError('');
+      setIotLoading(false);
+    };
 
     const fetchHumidity = async () => {
       if (isMounted) {
@@ -100,16 +113,7 @@ export function VendorDashboard() {
           return;
         }
 
-        const humidityValue = data[0]?.valor_humedad;
-        const parsedHumidity = typeof humidityValue === 'number' ? humidityValue : Number(humidityValue);
-        if (Number.isNaN(parsedHumidity)) {
-          setIotError('La lectura recibida no tiene un formato válido.');
-          setIotHumidity(null);
-          return;
-        }
-
-        setIotHumidity(parsedHumidity);
-        setIotError('');
+        applyRealtimeHumidity(data[0]?.valor_humedad);
       } catch (error) {
         if (!isMounted) return;
         setIotLoading(false);
@@ -122,10 +126,34 @@ export function VendorDashboard() {
     const intervalId = window.setInterval(() => {
       void fetchHumidity();
     }, 2000);
+    const realtimeChannel = supabase
+      .channel(`mediciones-humedad-camila-${connectionTime}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'mediciones_humedad',
+          filter: 'vendedor_id=eq.vendedor_camila',
+        },
+        (payload: { new?: { vendedor_id?: string; valor_humedad?: unknown; created_at?: string } }) => {
+          if (!isMounted) return;
+          const createdAt = payload.new?.created_at;
+          if (typeof createdAt === 'string') {
+            const createdAtTimestamp = new Date(createdAt).getTime();
+            if (!Number.isNaN(createdAtTimestamp) && createdAtTimestamp < connectionTimestamp) {
+              return;
+            }
+          }
+          applyRealtimeHumidity(payload.new?.valor_humedad);
+        }
+      )
+      .subscribe();
 
     return () => {
       isMounted = false;
       window.clearInterval(intervalId);
+      void supabase.removeChannel(realtimeChannel);
     };
   }, [iotFlowState, isCamilaSession, connectionTime]);
 
