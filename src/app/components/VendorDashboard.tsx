@@ -49,6 +49,7 @@ export function VendorDashboard() {
   const [iotHumidity, setIotHumidity] = useState<number | null>(null);
   const [iotLoading, setIotLoading] = useState(false);
   const [iotError, setIotError] = useState('');
+  const [hasValidHumidityReading, setHasValidHumidityReading] = useState(false);
   const [iotFlowState, setIotFlowState] = useState<IotFlowState>('idle');
   const [connectionTime, setConnectionTime] = useState('');
   const [showCertificateModal, setShowCertificateModal] = useState(false);
@@ -76,23 +77,29 @@ export function VendorDashboard() {
       const parsedHumidity = typeof humidityValue === 'number' ? humidityValue : Number(humidityValue);
       if (Number.isNaN(parsedHumidity)) {
         setIotError('La lectura recibida no tiene un formato válido.');
-        setIotHumidity(null);
+        if (!hasValidHumidityReading) {
+          setIotHumidity(null);
+        }
+        return;
+      }
+      if (parsedHumidity <= 0) {
         return;
       }
       setIotHumidity(parsedHumidity);
       setIotError('');
       setIotLoading(false);
+      setHasValidHumidityReading(true);
     };
 
     const fetchHumidity = async () => {
-      if (isMounted) {
+      if (isMounted && !hasValidHumidityReading) {
         setIotLoading(true);
       }
       try {
         const { data, error } = await supabase
           .from('mediciones_humedad')
           .select('valor_humedad, created_at')
-          .eq('vendedor_id', 'vendedor_camila')
+          .eq('vendedor_id', '1')
           .gte('created_at', connectionTime)
           .order('created_at', { ascending: false })
           .limit(1);
@@ -108,7 +115,9 @@ export function VendorDashboard() {
 
         if (!data || data.length === 0) {
           setIotError('');
-          setIotHumidity(null);
+          if (!hasValidHumidityReading) {
+            setIotHumidity(null);
+          }
           return;
         }
 
@@ -148,7 +157,7 @@ export function VendorDashboard() {
       window.clearInterval(intervalId);
       void supabase.removeChannel(realtimeChannel);
     };
-  }, [iotFlowState, isCamilaSession, connectionTime]);
+  }, [iotFlowState, isCamilaSession, connectionTime, hasValidHumidityReading]);
 
   const handlePublishLot = () => {
     if (iotHumidity === null) {
@@ -164,6 +173,7 @@ export function VendorDashboard() {
     setIotHumidity(null);
     setIotError('');
     setIotLoading(false);
+    setHasValidHumidityReading(false);
     setShowCertificateModal(false);
     setConnectionTime('');
   };
