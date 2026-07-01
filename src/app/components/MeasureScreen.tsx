@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, FileText, Loader2, Printer, RefreshCw, Wifi, X } from 'lucide-react';
 import { supabase } from '../services/supabaseClient';
@@ -17,6 +17,9 @@ export function MeasureScreen() {
   const [publishUiState, setPublishUiState] = useState<'idle' | 'loading' | 'published'>('idle');
   const [connectionTime, setConnectionTime] = useState('');
   const [showCertificateModal, setShowCertificateModal] = useState(false);
+  const hasValidHumidityReadingRef = useRef(false);
+  const publishInFlightRef = useRef(false);
+  const lastAppliedReadingRef = useRef('');
 
   const publishedAt = window.localStorage.getItem('lume_camila_published_at');
   const todayLabel = new Date().toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -42,6 +45,10 @@ export function MeasureScreen() {
             };
 
   useEffect(() => {
+    hasValidHumidityReadingRef.current = hasValidHumidityReading;
+  }, [hasValidHumidityReading]);
+
+  useEffect(() => {
     if (iotFlowState !== 'verifying') return;
     const verifyTimeout = window.setTimeout(() => {
       setIotFlowState('preview');
@@ -53,10 +60,10 @@ export function MeasureScreen() {
   }, [iotFlowState]);
 
   useEffect(() => {
-    if (iotFlowState !== 'preview' || !connectionTime) return;
+    if (iotFlowState !== 'preview' || !connectionTime || !showIotPanel) return;
     let isMounted = true;
 
-    const applyRealtimeHumidity = (humidityValue: unknown) => {
+    const applyRealtimeHumidity = (humidityValue: unknown, readingTimestamp?: string) => {
       const parsedHumidity = typeof humidityValue === 'number' ? humidityValue : Number(humidityValue);
       if (Number.isNaN(parsedHumidity)) {
         setIotError('La lectura recibida no tiene un formato válido.');
@@ -65,6 +72,12 @@ export function MeasureScreen() {
       if (parsedHumidity <= 0) {
         return;
       }
+      if (readingTimestamp && readingTimestamp === lastAppliedReadingRef.current) {
+        return;
+      }
+      if (readingTimestamp) {
+        lastAppliedReadingRef.current = readingTimestamp;
+      }
       setIotHumidity(parsedHumidity);
       setIotError('');
       setIotLoading(false);
@@ -72,7 +85,7 @@ export function MeasureScreen() {
     };
 
     const fetchHumidity = async () => {
-      if (isMounted && !hasValidHumidityReading) {
+      if (isMounted && !hasValidHumidityReadingRef.current) {
         setIotLoading(true);
       }
       try {
@@ -98,7 +111,7 @@ export function MeasureScreen() {
           return;
         }
 
-        applyRealtimeHumidity(data[0]?.valor_humedad);
+        applyRealtimeHumidity(data[0]?.valor_humedad, data[0]?.created_at);
       } catch (error) {
         if (!isMounted) return;
         setIotLoading(false);
@@ -124,7 +137,7 @@ export function MeasureScreen() {
         (payload: { new?: { vendedor_id?: string; valor_humedad?: unknown; created_at?: string } }) => {
           if (!isMounted) return;
           console.log('¡Dato Realtime recibido!', payload.new);
-          applyRealtimeHumidity(payload.new?.valor_humedad);
+          applyRealtimeHumidity(payload.new?.valor_humedad, payload.new?.created_at);
         }
       )
       .subscribe();
@@ -134,12 +147,13 @@ export function MeasureScreen() {
       window.clearInterval(intervalId);
       void supabase.removeChannel(realtimeChannel);
     };
-  }, [iotFlowState, connectionTime, hasValidHumidityReading]);
+  }, [iotFlowState, connectionTime, showIotPanel]);
 
   const handlePublishLot = () => {
-    if (iotHumidity === null || publishUiState !== 'idle') {
+    if (iotHumidity === null || publishUiState !== 'idle' || publishInFlightRef.current) {
       return;
     }
+    publishInFlightRef.current = true;
     setPublishUiState('loading');
     window.setTimeout(() => {
       setPublishUiState('published');
@@ -153,6 +167,8 @@ export function MeasureScreen() {
   };
 
   const handleResetMeasurement = () => {
+    publishInFlightRef.current = false;
+    lastAppliedReadingRef.current = '';
     setIotFlowState('idle');
     setIotHumidity(null);
     setIotError('');

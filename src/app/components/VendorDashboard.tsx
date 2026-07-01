@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, BarChart3, User, Gauge, Shield, Bell, X, Plus, Minus, ChevronRight, TrendingDown, TrendingUp, Settings } from 'lucide-react';
 import { useApp } from '../App';
