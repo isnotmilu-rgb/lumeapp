@@ -77,9 +77,6 @@ export function VendorDashboard() {
       const parsedHumidity = typeof humidityValue === 'number' ? humidityValue : Number(humidityValue);
       if (Number.isNaN(parsedHumidity)) {
         setIotError('La lectura recibida no tiene un formato válido.');
-        if (!hasValidHumidityReading) {
-          setIotHumidity(null);
-        }
         return;
       }
       if (parsedHumidity <= 0) {
@@ -115,9 +112,6 @@ export function VendorDashboard() {
 
         if (!data || data.length === 0) {
           setIotError('');
-          if (!hasValidHumidityReading) {
-            setIotHumidity(null);
-          }
           return;
         }
 
