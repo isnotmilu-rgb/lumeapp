@@ -64,8 +64,23 @@ export function Onboarding() {
 
   const handleLogin = () => {
     const normalizedIdentifier = loginIdentifier.trim().toLowerCase();
-    const role: AuthRole = normalizedIdentifier === 'camila@lumeapp.cl' ? 'vendor' : 'buyer';
-    const identity = normalizedIdentifier === 'camila@lumeapp.cl' ? 'vendedor_camila' : (normalizedIdentifier || `demo-${Date.now()}`);
+    const rawUsers = window.localStorage.getItem(DEMO_USERS_STORAGE_KEY);
+    const parsedUsers = rawUsers ? JSON.parse(rawUsers) as DemoUser[] : [];
+    const matchedUser = parsedUsers.find((user) => {
+      const normalizedUsername = user.username.trim().toLowerCase();
+      const normalizedContact = user.contact.trim().toLowerCase();
+      return normalizedUsername === normalizedIdentifier || normalizedContact === normalizedIdentifier;
+    });
+    const role: AuthRole =
+      normalizedIdentifier === 'camila@lumeapp.cl'
+        ? 'vendor'
+        : matchedUser?.role ?? selectedRole ?? 'buyer';
+    const identity =
+      normalizedIdentifier === 'camila@lumeapp.cl'
+        ? 'vendedor_camila'
+        : matchedUser
+          ? `demo_${matchedUser.role}_${matchedUser.username.trim().toLowerCase().replace(/\s+/g, '_')}`
+          : (normalizedIdentifier || `demo_${role}_${Date.now()}`);
     setFormError('');
     completeAccess(role, identity);
   };

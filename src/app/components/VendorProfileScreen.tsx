@@ -1,10 +1,20 @@
 import { useNavigate } from 'react-router-dom';
 import { Home, BarChart3, User, ChevronRight, Store, FileText, Settings, HelpCircle, LogOut, Bell, CreditCard, Gauge, Shield } from 'lucide-react';
 import { useApp } from '../App';
+import { vendors } from '../data/vendors';
 
 export function VendorProfileScreen() {
   const navigate = useNavigate();
   const { setShowComingSoon, setUserType } = useApp();
+  const sessionIdentity = window.localStorage.getItem('lume_demo_identity');
+  const matchedVendor = vendors.find((vendor) => String(vendor.id) === String(sessionIdentity));
+  const vendorDisplayName = sessionIdentity === 'vendedor_camila' ? 'Leñería Camila' : matchedVendor?.name ?? 'Mi Leñería';
+  const vendorInitials = vendorDisplayName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((word) => word[0]?.toUpperCase() ?? '')
+    .join('');
 
   const handleLogout = () => {
     window.localStorage.removeItem('lume_demo_identity');
@@ -42,10 +52,10 @@ export function VendorProfileScreen() {
         <div className="bg-white p-6 mb-2">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 rounded-full bg-[#2E7D32] flex items-center justify-center text-white text-2xl font-bold">
-              LB
+              {vendorInitials || 'ML'}
             </div>
             <div className="flex-1">
-              <h2 className="font-bold text-lg">Leñas Boyeco</h2>
+              <h2 className="font-bold text-lg">{vendorDisplayName}</h2>
               <p className="text-sm text-gray-600">Temuco, Chile</p>
               <div className="flex items-center gap-2 mt-1">
                 <span className="bg-[#2E7D32] text-white text-xs px-2 py-0.5 rounded-full">
@@ -78,7 +88,7 @@ export function VendorProfileScreen() {
           </div>
           <div className="px-4 py-3 border-b border-gray-100">
             <p className="text-xs text-gray-500">Nombre comercial</p>
-            <p className="text-sm font-medium">Leñas Boyeco</p>
+            <p className="text-sm font-medium">{vendorDisplayName}</p>
           </div>
           <div className="px-4 py-3 border-b border-gray-100">
             <p className="text-xs text-gray-500">RUT</p>

@@ -2,11 +2,15 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Home, BarChart3, User, Shield, CheckCircle } from 'lucide-react';
 import { useApp } from '../App';
+import { vendors } from '../data/vendors';
 
 export function CertificationScreen() {
   const navigate = useNavigate();
   const { setCurrentFlow, setCurrentStep } = useApp();
   const [displayHumidity, setDisplayHumidity] = useState(0);
+  const sessionIdentity = window.localStorage.getItem('lume_demo_identity');
+  const matchedVendor = vendors.find((vendor) => String(vendor.id) === String(sessionIdentity));
+  const vendorDisplayName = sessionIdentity === 'vendedor_camila' ? 'Leñería Camila' : matchedVendor?.name ?? 'Mi Leñería';
 
   const certificationData = {
     active: true,
@@ -70,7 +74,7 @@ export function CertificationScreen() {
       {/* Top Bar */}
       <div className="bg-[#2E7D32] text-white px-4 py-4 flex-shrink-0">
         <h1 className="font-bold text-lg">Estado de Certificación</h1>
-        <p className="text-[#A5D6A7] text-xs">NCh 2965 · Leñas Boyeco</p>
+        <p className="text-[#A5D6A7] text-xs">NCh 2965 · {vendorDisplayName}</p>
       </div>
 
       {/* Scrollable Content */}
@@ -142,7 +146,7 @@ export function CertificationScreen() {
           <div className="bg-white rounded-xl p-4 shadow-sm border-2 border-[#E8F5E9]">
             <div className="bg-[#E8F5E9] rounded-lg p-4">
               <div className="flex justify-between items-start mb-2">
-                <h4 className="font-bold text-[#1B5E20]">Leñas Boyeco</h4>
+                <h4 className="font-bold text-[#1B5E20]">{vendorDisplayName}</h4>
                 <span className="bg-[#2E7D32] text-white text-xs px-2 py-1 rounded-full">
                   ✓ Seca
                 </span>
