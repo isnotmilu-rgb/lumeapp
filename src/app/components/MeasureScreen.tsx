@@ -7,6 +7,8 @@ type IotFlowState = 'idle' | 'verifying' | 'preview' | 'success';
 
 export function MeasureScreen() {
   const navigate = useNavigate();
+  const [selectedWoodType, setSelectedWoodType] = useState('');
+  const [showIotPanel, setShowIotPanel] = useState(false);
   const [iotHumidity, setIotHumidity] = useState<number | null>(null);
   const [iotLoading, setIotLoading] = useState(false);
   const [iotError, setIotError] = useState('');
@@ -178,9 +180,40 @@ export function MeasureScreen() {
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-6" style={{ WebkitOverflowScrolling: 'touch' }}>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-[#BBDEFB]">
+        <div className="mb-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+          <h3 className="text-sm font-bold text-slate-900">Paso 1: Configura el lote</h3>
+          <p className="mt-1 text-xs text-slate-600">Selecciona el tipo de leña para iniciar la medición.</p>
+          <div className="mt-3">
+            <label className="mb-1 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-600">
+              Tipo de leña
+            </label>
+            <select
+              value={selectedWoodType}
+              onChange={(event) => setSelectedWoodType(event.target.value)}
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#0D47A1]"
+            >
+              <option value="">Seleccionar tipo de leña</option>
+              <option value="Eucaliptus">Eucaliptus</option>
+              <option value="Roble">Roble</option>
+              <option value="Coigüe">Coigüe</option>
+              <option value="Aromo">Aromo</option>
+            </select>
+          </div>
+          <button
+            onClick={() => setShowIotPanel(true)}
+            disabled={!selectedWoodType}
+            className="mt-4 w-full rounded-lg bg-[#2E7D32] py-2.5 text-sm font-semibold text-white transition hover:bg-[#1B5E20] disabled:cursor-not-allowed disabled:bg-[#A5D6A7]"
+          >
+            Iniciar Medición
+          </button>
+        </div>
+
+        {showIotPanel && (
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-[#BBDEFB]">
             <h3 className="font-bold text-[#0D47A1] mb-2">Módulo IoT Activado</h3>
-            <p className="text-xs text-slate-600 mb-3">Conectado a mediciones_humedad · vendedor_camila</p>
+            <p className="text-xs text-slate-600 mb-3">
+              Conectado a mediciones_humedad · vendedor_camila · Lote: {selectedWoodType}
+            </p>
             <div className="mb-3 grid grid-cols-2 gap-2">
               <div className="rounded-lg bg-[#F8FBFF] px-3 py-2 text-xs text-[#0D47A1] border border-[#BBDEFB]">Batería: 87% 🔋</div>
               <div className="rounded-lg bg-[#F8FBFF] px-3 py-2 text-xs text-[#0D47A1] border border-[#BBDEFB]">Señal Wi-Fi: Excelente 📶</div>
@@ -257,7 +290,10 @@ export function MeasureScreen() {
                   )}
                 </button>
                 <button
-                  onClick={handleResetMeasurement}
+                  onClick={() => {
+                    handleResetMeasurement();
+                    setShowIotPanel(false);
+                  }}
                   className="mt-2 w-full rounded-lg border border-slate-300 bg-white py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                 >
                   Cancelar / Volver
@@ -288,7 +324,8 @@ export function MeasureScreen() {
                 )}
               </div>
             )}
-        </div>
+          </div>
+        )}
       </div>
 
       {showCertificateModal && (
