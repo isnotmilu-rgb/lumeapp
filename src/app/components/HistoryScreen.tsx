@@ -72,13 +72,17 @@ type HistoryMeasurement = {
   species: string;
   verified: boolean;
   status: 'Vigente' | 'Expirada';
+  id?: string | number;
+  id_medicion?: string | number;
+  created_at?: string;
+  vendedor_id?: string;
 };
 
 export function HistoryScreen() {
   const navigate = useNavigate();
   const { id } = useParams();
   const sessionIdentity = window.localStorage.getItem('lume_demo_identity');
-  const resolvedVendorId = id === 'vendedor_camila' || sessionIdentity === 'vendedor_camila' ? 'vendedor_camila' : String(id ?? '');
+  const resolvedVendorId = String(id ?? (sessionIdentity === 'vendedor_camila' ? 'vendedor_camila' : ''));
   const idNum = Number(resolvedVendorId);
   const isCamilaVendor = resolvedVendorId === 'vendedor_camila';
   const vendor = vendors.find(v => String(v.id) === resolvedVendorId);
@@ -100,7 +104,7 @@ export function HistoryScreen() {
 
       const { data, error } = await supabase
         .from('mediciones_humedad')
-        .select('valor_humedad, created_at')
+        .select('*')
         .eq('vendedor_id', realtimeSourceVendorId)
         .order('created_at', { ascending: false })
         .limit(25);
@@ -127,15 +131,24 @@ export function HistoryScreen() {
             date: createdAt.toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' }),
             time: createdAt.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
             humidity,
-            species: 'Eucaliptus',
+            species:
+              (typeof measurement?.tipo_madera === 'string' && measurement.tipo_madera)
+              || (typeof measurement?.tipo_lena === 'string' && measurement.tipo_lena)
+              || (typeof measurement?.wood_type === 'string' && measurement.wood_type)
+              || 'Coigüe',
             verified: true,
             status: 'Vigente',
+            id: measurement?.id,
+            id_medicion: measurement?.id_medicion,
+            created_at: measurement?.created_at,
+            vendedor_id: typeof measurement?.vendedor_id === 'string' ? measurement.vendedor_id : realtimeSourceVendorId,
           } as HistoryMeasurement;
         })
         .filter((measurement): measurement is HistoryMeasurement => measurement !== null);
 
       const storedPublishedHumidity = window.localStorage.getItem('lume_camila_published_humidity');
       const storedPublishedAt = window.localStorage.getItem('lume_camila_published_at');
+      const storedPublishedWoodType = window.localStorage.getItem('lume_camila_published_wood_type');
       const parsedPublishedHumidity = storedPublishedHumidity !== null ? Number(storedPublishedHumidity) : NaN;
       const mergedMeasurements = [...mappedMeasurements];
       if (!Number.isNaN(parsedPublishedHumidity) && typeof storedPublishedAt === 'string') {
@@ -146,9 +159,11 @@ export function HistoryScreen() {
             date: publishedDate.toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' }),
             time: publishedDate.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
             humidity: parsedPublishedHumidity,
-            species: 'Eucaliptus',
+            species: storedPublishedWoodType || 'Coigüe',
             verified: true,
             status: 'Vigente',
+            created_at: storedPublishedAt,
+            vendedor_id: realtimeSourceVendorId,
           });
         }
       }
@@ -182,17 +197,20 @@ export function HistoryScreen() {
       }));
   const uniqueMeasurementsForRender: HistoryMeasurement[] = [];
   const seenIds = new Set<string | number>();
+  const seenContentKeys = new Set<string>();
+  const createContentKey = (item: HistoryMeasurement) =>
+    `${item.humidity}-${String(item.vendedor_id ?? realtimeSourceVendorId)}-${String(item.created_at ?? item.key).substring(0, 16)}`;
 
   (renderedMeasurements || []).forEach((item) => {
-    const uniqueKey = (item as { id_medicion?: string | number; id?: string | number; key?: string }).id_medicion
-      || (item as { id?: string | number; key?: string }).id
-      || item.key;
-    if (uniqueKey && !seenIds.has(uniqueKey)) {
+    const uniqueKey = item.id_medicion || item.id || item.created_at || item.key;
+    const contentKey = createContentKey(item);
+    if (uniqueKey && !seenIds.has(uniqueKey) && !seenContentKeys.has(contentKey)) {
       seenIds.add(uniqueKey);
+      seenContentKeys.add(contentKey);
       uniqueMeasurementsForRender.push(item);
     }
   });
-  const historyListForTimeline = isCamilaVendor ? uniqueMeasurementsForRender.slice(1) : uniqueMeasurementsForRender;
+  const historyListForTimeline = uniqueMeasurementsForRender;
 
   if (!vendor) return (
     <div className="min-h-screen flex flex-col items-center justify-center">
@@ -290,7 +308,7 @@ export function HistoryScreen() {
                 <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-3xl font-semibold text-[#2E7D32]">{measurement.humidity}%</p>
-                    <p className="text-sm text-slate-500">{index === 0 ? (latestPublishedWoodType || measurement.species || 'Eucaliptus') : (measurement.species || 'Eucaliptus')}</p>
+                    <p className="text-sm text-slate-500">{index === 0 ? (latestPublishedWoodType || measurement.species || 'Coigüe') : (measurement.species || 'Coigüe')}</p>
                   </div>
                   <div className="h-2.5 w-full rounded-full bg-slate-100 overflow-hidden sm:max-w-[280px]">
                     <div

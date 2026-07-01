@@ -32,8 +32,11 @@ export function SellerProfile() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { setCurrentStep, userType } = useApp();
+  const sessionIdentity = window.localStorage.getItem('lume_demo_identity');
   const vendor = vendors.find(vendor => String(vendor.id) === String(id));
-  const isCamilaLiveVendor = id === 'vendedor_camila' && userType === 'buyer';
+  const isCamilaVendorProfile = id === 'vendedor_camila';
+  const isCamilaOwnerSession = sessionIdentity === 'vendedor_camila' && userType === 'vendor';
+  const shouldShowLiveSensor = isCamilaVendorProfile && isCamilaOwnerSession;
   const realtimeSourceVendorId = String(vendor?.id ?? id ?? '') === 'vendedor_camila' ? '1' : String(vendor?.id ?? id ?? '');
   const [selectedMeters, setSelectedMeters] = useState(1);
   const woodTypes = vendor?.woods.map(wood => wood.name) ?? ['Eucaliptus', 'Roble', 'Coigüe'];
@@ -118,7 +121,7 @@ export function SellerProfile() {
   }, [vendor?.id]);
 
   useEffect(() => {
-    if (!isCamilaLiveVendor) return;
+    if (!isCamilaVendorProfile) return;
     const storedPublishedHumidity = window.localStorage.getItem('lume_camila_published_humidity');
     if (storedPublishedHumidity !== null) {
       const parsedHumidity = Number(storedPublishedHumidity);
@@ -201,7 +204,7 @@ export function SellerProfile() {
       isMounted = false;
       window.clearInterval(interval);
     };
-  }, [isCamilaLiveVendor, realtimeSourceVendorId]);
+  }, [isCamilaVendorProfile, realtimeSourceVendorId]);
 
   if (!vendor) {
     return (
@@ -295,17 +298,20 @@ export function SellerProfile() {
       });
     }
   });
-  const historyListForTimeline = uniqueMeasurementsForRender.slice(1);
+  const historyListForTimeline = shouldShowLiveSensor
+    ? uniqueMeasurementsForRender.slice(1)
+    : uniqueMeasurementsForRender;
 
-  const timelineMeasurements = isCamilaLiveVendor
+  const timelineMeasurements = isCamilaVendorProfile
     ? historyListForTimeline.map((measurement, index) => {
         const measurementDate = new Date(measurement.created_at);
         return {
           key: measurement.created_at,
           humidity: measurement.valor_humedad,
-          woodType: index === 0
-            ? latestPublishedWoodType || measurement.tipo_madera || measurement.tipo_lena || measurement.wood_type || 'Eucaliptus'
-            : measurement.tipo_madera || measurement.tipo_lena || measurement.wood_type || 'Eucaliptus',
+          woodType:
+            !shouldShowLiveSensor && index === 0
+              ? latestPublishedWoodType || measurement.tipo_madera || measurement.tipo_lena || measurement.wood_type || 'Coigüe'
+              : measurement.tipo_madera || measurement.tipo_lena || measurement.wood_type || 'Coigüe',
           date: measurementDate.toLocaleDateString('es-CL', {
             day: '2-digit',
             month: 'short',
@@ -320,7 +326,7 @@ export function SellerProfile() {
     : measurements.map((measurement, index) => ({
         key: `${measurement.date}-${measurement.time}-${index}`,
         humidity: measurement.humidity,
-        woodType: 'Eucaliptus',
+        woodType: 'Coigüe',
         date: measurement.date,
         time: measurement.time,
       }));
@@ -509,7 +515,7 @@ export function SellerProfile() {
                 </button>
               </div>
 
-              {isCamilaLiveVendor && (
+              {shouldShowLiveSensor && (
                 <div className="mb-6 rounded-[20px] border border-[#BBDEFB] bg-[#E3F2FD] p-5">
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#0D47A1]">Sensor en vivo · Vendedor 11</p>
                   {liveLoading ? (
@@ -531,7 +537,7 @@ export function SellerProfile() {
                 </div>
               )}
 
-              {isCamilaLiveVendor && timelineMeasurements.length === 0 ? (
+              {isCamilaVendorProfile && timelineMeasurements.length === 0 ? (
                 <div className="rounded-[20px] border border-slate-200 bg-slate-50 px-5 py-6 text-sm text-slate-600">
                   Este vendedor aún no registra un historial de mediciones certificadas.
                 </div>
