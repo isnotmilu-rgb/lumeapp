@@ -9,7 +9,7 @@ export function MeasureScreen() {
   const navigate = useNavigate();
   const [selectedWoodType, setSelectedWoodType] = useState('');
   const [showIotPanel, setShowIotPanel] = useState(false);
-  const [processedMeasurements, setProcessedMeasurements] = useState<Array<{ id: string }>>([]);
+  const [processedMeasurements, setProcessedMeasurements] = useState<Array<{ uniqueKey: string; created_at: string; valor_humedad: number }>>([]);
   const [iotHumidity, setIotHumidity] = useState<number | null>(null);
   const [iotLoading, setIotLoading] = useState(false);
   const [iotError, setIotError] = useState('');
@@ -46,6 +46,18 @@ export function MeasureScreen() {
               text: 'text-red-600',
             };
 
+  const getMeasurementUniqueKey = (record?: { id_medicion?: string | number; id?: string | number; created_at?: string; valor_humedad?: unknown }) => {
+    if (!record) return '';
+    if (record.id_medicion !== undefined && record.id_medicion !== null) return `id_medicion:${String(record.id_medicion)}`;
+    if (record.id !== undefined && record.id !== null) return `id:${String(record.id)}`;
+    if (record.created_at) return `created_at:${record.created_at}`;
+    return `fallback:${String(record.valor_humedad ?? '')}`;
+  };
+
+  const uniqueMeasurementsForRender = Array.from(
+    new Map(processedMeasurements.map(item => [item.uniqueKey, item])).values()
+  );
+
   useEffect(() => {
     hasValidHumidityReadingRef.current = hasValidHumidityReading;
   }, [hasValidHumidityReading]);
@@ -65,7 +77,11 @@ export function MeasureScreen() {
     if (iotFlowState !== 'preview' || !connectionTime || !showIotPanel) return;
     let isMounted = true;
 
-    const applyRealtimeHumidity = (humidityValue: unknown, readingTimestamp?: string, readingId?: string | number) => {
+    const applyRealtimeHumidity = (
+      humidityValue: unknown,
+      readingTimestamp?: string,
+      record?: { id_medicion?: string | number; id?: string | number; created_at?: string; valor_humedad?: unknown }
+    ) => {
       const parsedHumidity = typeof humidityValue === 'number' ? humidityValue : Number(humidityValue);
       if (Number.isNaN(parsedHumidity)) {
         setIotError('La lectura recibida no tiene un formato válido.');
@@ -74,14 +90,16 @@ export function MeasureScreen() {
       if (parsedHumidity <= 0) {
         return;
       }
-      if (readingId !== undefined && readingId !== null) {
-        const normalizedId = String(readingId);
-        if (processedMeasurementIdsRef.current.has(normalizedId)) {
+      const uniqueKey = getMeasurementUniqueKey(record);
+      if (uniqueKey) {
+        if (processedMeasurementIdsRef.current.has(uniqueKey)) {
           return;
         }
-        processedMeasurementIdsRef.current.add(normalizedId);
+        processedMeasurementIdsRef.current.add(uniqueKey);
         setProcessedMeasurements(prev =>
-          prev.some(item => item.id === normalizedId) ? prev : [...prev, { id: normalizedId }]
+          prev.some(item => item.uniqueKey === uniqueKey)
+            ? prev
+            : [...prev, { uniqueKey, created_at: readingTimestamp ?? '', valor_humedad: parsedHumidity }]
         );
       }
       if (readingTimestamp && readingTimestamp === lastAppliedReadingRef.current) {
@@ -123,7 +141,12 @@ export function MeasureScreen() {
           return;
         }
 
-        applyRealtimeHumidity(data[0]?.valor_humedad, data[0]?.created_at, data[0]?.id);
+        applyRealtimeHumidity(data[0]?.valor_humedad, data[0]?.created_at, {
+          id_medicion: (data[0] as { id_medicion?: string | number })?.id_medicion,
+          id: data[0]?.id,
+          created_at: data[0]?.created_at,
+          valor_humedad: data[0]?.valor_humedad,
+        });
       } catch (error) {
         if (!isMounted) return;
         setIotLoading(false);
@@ -146,10 +169,10 @@ export function MeasureScreen() {
           table: 'mediciones_humedad',
           filter: 'vendedor_id=eq.1',
         },
-        (payload: { new?: { id?: string | number; vendedor_id?: string; valor_humedad?: unknown; created_at?: string } }) => {
+        (payload: { new?: { id_medicion?: string | number; id?: string | number; vendedor_id?: string; valor_humedad?: unknown; created_at?: string } }) => {
           if (!isMounted) return;
           console.log('¡Dato Realtime recibido!', payload.new);
-          applyRealtimeHumidity(payload.new?.valor_humedad, payload.new?.created_at, payload.new?.id);
+          applyRealtimeHumidity(payload.new?.valor_humedad, payload.new?.created_at, payload.new);
         }
       )
       .subscribe();
@@ -299,7 +322,7 @@ export function MeasureScreen() {
                 {iotError && <p className="mt-2 text-xs text-red-600">{iotError}</p>}
                 <button
                   onClick={handlePublishLot}
-                  disabled={iotHumidity === null || publishUiState !== 'idle'}
+                  disabled={iotHumidity === null || publishUiState !== 'idle' || publishInFlightRef.current}
                   className={`mt-3 w-full rounded-lg py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed ${
                     publishUiState === 'published'
                       ? 'bg-green-600'
@@ -351,6 +374,22 @@ export function MeasureScreen() {
                 </button>
                 {publishedAt && (
                   <p className="mt-2 text-xs text-[#1B5E20]/75">Publicado: {new Date(publishedAt).toLocaleString('es-CL')}</p>
+                )}
+
+                {uniqueMeasurementsForRender.length > 0 && (
+                  <div className="mt-3 rounded-lg border border-[#BBDEFB] bg-[#F8FBFF] p-3">
+                    <p className="text-xs font-semibold text-[#0D47A1] mb-2">Lecturas recientes (sin duplicados)</p>
+                    <div className="space-y-2">
+                      {uniqueMeasurementsForRender.map((measurement) => (
+                        <div key={measurement.uniqueKey} className="flex items-center justify-between rounded-md bg-white px-3 py-2 border border-[#E3F2FD]">
+                          <span className="text-xs text-slate-600">
+                            {measurement.created_at ? new Date(measurement.created_at).toLocaleString('es-CL') : 'Sin timestamp'}
+                          </span>
+                          <span className="text-sm font-bold text-[#0D47A1]">{measurement.valor_humedad}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             )}
