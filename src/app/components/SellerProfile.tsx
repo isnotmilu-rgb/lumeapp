@@ -243,8 +243,21 @@ export function SellerProfile() {
       status: (vendor.humidity !== null ? vendor.humidity + 2 : 26) <= 20 ? 'Óptimo' : 'Aceptable',
     },
   ];
+  const uniqueMeasurementsForRender: Array<{ valor_humedad: number; created_at: string; id_medicion?: string | number; id?: string | number }> = [];
+  const seenIds = new Set<string | number>();
+
+  (measurementHistory || []).forEach((item) => {
+    const uniqueKey = (item as { id_medicion?: string | number; id?: string | number; created_at?: string }).id_medicion
+      || (item as { id?: string | number; created_at?: string }).id
+      || item.created_at;
+    if (uniqueKey && !seenIds.has(uniqueKey)) {
+      seenIds.add(uniqueKey);
+      uniqueMeasurementsForRender.push(item as { valor_humedad: number; created_at: string; id_medicion?: string | number; id?: string | number });
+    }
+  });
+
   const timelineMeasurements = isCamilaLiveVendor
-    ? measurementHistory.map((measurement) => {
+    ? uniqueMeasurementsForRender.map((measurement) => {
         const measurementDate = new Date(measurement.created_at);
         return {
           key: measurement.created_at,
