@@ -9,7 +9,7 @@ export function MeasureScreen() {
   const navigate = useNavigate();
   const [selectedWoodType, setSelectedWoodType] = useState('');
   const [showIotPanel, setShowIotPanel] = useState(false);
-  const [processedMeasurements, setProcessedMeasurements] = useState<Array<{ uniqueKey: string; created_at: string; valor_humedad: number; vendedor_id: string }>>([]);
+  const [processedMeasurements, setProcessedMeasurements] = useState<Array<{ uniqueKey: string; created_at: string; valor_humedad: number; vendedor_id: string; id?: string | number; id_medicion?: string | number }>>([]);
   const [iotHumidity, setIotHumidity] = useState<number | null>(null);
   const [iotLoading, setIotLoading] = useState(false);
   const [iotError, setIotError] = useState('');
@@ -24,6 +24,7 @@ export function MeasureScreen() {
   const processedMeasurementIdsRef = useRef<Set<string>>(new Set());
   const processedContentKeysRef = useRef<Set<string>>(new Set());
   const realtimeChannelRef = useRef<any>(null);
+  const measurementsRef = useRef(processedMeasurements);
 
   const publishedAt = window.localStorage.getItem('lume_camila_published_at');
   const todayLabel = new Date().toLocaleDateString('es-CL', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -68,6 +69,10 @@ export function MeasureScreen() {
   }, [hasValidHumidityReading]);
 
   useEffect(() => {
+    measurementsRef.current = processedMeasurements;
+  }, [processedMeasurements]);
+
+  useEffect(() => {
     if (iotFlowState !== 'verifying') return;
     const verifyTimeout = window.setTimeout(() => {
       setIotFlowState('preview');
@@ -100,6 +105,17 @@ export function MeasureScreen() {
         vendedor_id: record?.vendedor_id ?? '1',
         created_at: readingTimestamp ?? record?.created_at,
       });
+      const idMedicion = record?.id_medicion;
+      const id = record?.id;
+      const alreadyExistsInRef = measurementsRef.current.some(item => {
+        const itemAny = item as unknown as { id_medicion?: string | number; id?: string | number };
+        const sameByPrimaryKey = (idMedicion !== undefined && itemAny.id_medicion === idMedicion) || (id !== undefined && itemAny.id === id);
+        const sameByContent = createContentKey(item) === contentKey;
+        return sameByPrimaryKey || sameByContent;
+      });
+      if (alreadyExistsInRef) {
+        return;
+      }
       if (contentKey && processedContentKeysRef.current.has(contentKey)) {
         return;
       }
@@ -112,11 +128,26 @@ export function MeasureScreen() {
         if (contentKey) {
           processedContentKeysRef.current.add(contentKey);
         }
-        setProcessedMeasurements(prev =>
-          prev.some(item => item.uniqueKey === uniqueKey || createContentKey(item) === contentKey)
-            ? prev
-            : [...prev, { uniqueKey, created_at: readingTimestamp ?? '', valor_humedad: parsedHumidity, vendedor_id: String(record?.vendedor_id ?? '1') }]
-        );
+        setProcessedMeasurements(prev => {
+          const exists = prev.some(item => {
+            const itemAny = item as unknown as { id_medicion?: string | number; id?: string | number };
+            return (
+              item.uniqueKey === uniqueKey ||
+              createContentKey(item) === contentKey ||
+              (idMedicion !== undefined && itemAny.id_medicion === idMedicion) ||
+              (id !== undefined && itemAny.id === id)
+            );
+          });
+          if (exists) return prev;
+          return [{
+            uniqueKey,
+            created_at: readingTimestamp ?? '',
+            valor_humedad: parsedHumidity,
+            vendedor_id: String(record?.vendedor_id ?? '1'),
+            id: id,
+            id_medicion: idMedicion,
+          }, ...prev];
+        });
       }
       if (readingTimestamp && readingTimestamp === lastAppliedReadingRef.current) {
         return;
